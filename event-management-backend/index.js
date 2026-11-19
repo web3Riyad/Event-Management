@@ -32,10 +32,10 @@ app.get('/', (req, res) => {
   res.send('Event Management API is running...');
 });
 
-// GET all events with optional filters (timeframe=upcoming|past, eventType=Cleanup|Donation|...)
+// GET all events with optional filters (timeframe=upcoming|past, eventType=Cleanup|Donation|..., limit=6)
 app.get('/events', async (req, res) => {
   try {
-    const { timeframe, eventType } = req.query;
+    const { timeframe, eventType, limit } = req.query;
     const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
     let query = {};
 
@@ -54,7 +54,13 @@ app.get('/events', async (req, res) => {
       sortOrder = -1; // Most recent past event first
     }
 
-    const events = await eventsCollection.find(query).sort({ eventDate: sortOrder }).toArray();
+    let cursor = eventsCollection.find(query).sort({ eventDate: sortOrder });
+    const limitNum = parseInt(limit, 10);
+    if (!isNaN(limitNum) && limitNum > 0) {
+      cursor = cursor.limit(limitNum);
+    }
+
+    const events = await cursor.toArray();
     res.json(events);
   } catch (err) {
     console.error("Error fetching events:", err);
@@ -66,14 +72,20 @@ app.get('/events', async (req, res) => {
 app.get('/events/upcoming', async (req, res) => {
   try {
     const today = new Date().toISOString().split('T')[0];
-    const { eventType } = req.query;
+    const { eventType, limit } = req.query;
     let query = { eventDate: { $gte: today } };
 
     if (eventType && eventType.toLowerCase() !== 'all') {
       query.eventType = { $regex: new RegExp(`^${eventType}$`, 'i') };
     }
 
-    const events = await eventsCollection.find(query).sort({ eventDate: 1 }).toArray();
+    let cursor = eventsCollection.find(query).sort({ eventDate: 1 });
+    const limitNum = parseInt(limit, 10);
+    if (!isNaN(limitNum) && limitNum > 0) {
+      cursor = cursor.limit(limitNum);
+    }
+
+    const events = await cursor.toArray();
     res.json(events);
   } catch (err) {
     console.error("Error fetching upcoming events:", err);

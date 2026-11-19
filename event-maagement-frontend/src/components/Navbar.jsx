@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   Calendar,
   PlusCircle,
-  CalendarDays,
-  Ticket,
+  Settings,
+  CheckCircle2,
   LogOut,
   LogIn,
   UserPlus,
@@ -26,14 +26,6 @@ import { useSession, signOut } from "@/lib/auth-client";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import {
   Sheet,
   SheetTrigger,
   SheetContent,
@@ -42,10 +34,12 @@ import {
 } from "@/components/ui/sheet";
 
 export default function Navbar() {
-  // Listen to the real Better Auth session state
   const { data: session } = useSession();
   const router = useRouter();
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   const isLoggedIn = Boolean(session?.user);
   const user = session?.user;
@@ -64,9 +58,21 @@ export default function Navbar() {
       .slice(0, 2)
       .toUpperCase() || "U";
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const handleLogout = async () => {
     try {
       await signOut();
+      setIsDropdownOpen(false);
       router.push("/");
       router.refresh();
     } catch (err) {
@@ -100,10 +106,10 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {/* 2. Navigation: Upcoming Events (Points to /#upcoming on Homepage) */}
+        {/* 2. Navigation: Upcoming Events */}
         <nav className="hidden md:flex items-center gap-8">
           <Link
-            href="/#upcoming"
+            href="/upcoming-events"
             className="flex items-center gap-2 text-sm font-medium tracking-wide text-[#F5F1E8]/90 hover:text-[#D9A441] transition-all duration-200 py-2 border-b-2 border-transparent hover:border-[#D9A441]"
           >
             <Calendar className="w-4 h-4 text-[#D9A441]" />
@@ -139,108 +145,102 @@ export default function Navbar() {
               </Link>
             </div>
           ) : (
-            /* If logged in -> Show Profile Picture (Dropdown + Hover Name) + Logout button */
+            /* If logged in -> Show Profile Picture (Dropdown matching screenshot) + Navbar Logout button */
             <div className="flex items-center gap-4">
               
-              {/* Profile Avatar Trigger and Dropdown Menu */}
-              <div className="relative group/user">
-                <DropdownMenu>
-                  <DropdownMenuTrigger
-                    render={
-                      <button
-                        type="button"
-                        className="flex items-center gap-2 p-1 rounded-full bg-[#181818] border border-[#D9A441]/40 hover:border-[#D9A441] transition-all focus:outline-none focus:ring-2 focus:ring-[#D9A441]/60 cursor-pointer"
-                        aria-label="User account menu"
-                      />
-                    }
-                  >
-                    <Avatar className="size-9 ring-2 ring-[#D9A441]/40 hover:ring-[#D9A441] transition-all">
-                      <AvatarImage src={avatarUrl} alt={displayName} />
-                      <AvatarFallback className="bg-[#181818] text-[#D9A441] font-semibold text-xs">
-                        {initials}
-                      </AvatarFallback>
-                    </Avatar>
-                    <ChevronDown className="w-3.5 h-3.5 text-[#D9A441] pr-0.5" />
-                  </DropdownMenuTrigger>
+              {/* Profile Avatar Trigger & Dropdown Menu */}
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsDropdownOpen((prev) => !prev)}
+                  className="flex items-center gap-2 p-1 rounded-full bg-black/40 hover:bg-black/60 border border-[#D9A441]/50 hover:border-[#D9A441] transition-all focus:outline-none focus:ring-2 focus:ring-[#D9A441]/60 cursor-pointer"
+                  aria-label="User account menu"
+                  aria-expanded={isDropdownOpen}
+                >
+                  <Avatar className="size-9 ring-2 ring-[#D9A441]/40">
+                    <AvatarImage src={avatarUrl} alt={displayName} />
+                    <AvatarFallback className="bg-[#181818] text-[#D9A441] font-semibold text-xs">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 text-[#D9A441] transition-transform duration-200 pr-0.5 ${
+                      isDropdownOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
 
-                  <DropdownMenuContent
-                    align="end"
-                    className="w-64 bg-[#141414] border border-[#2A2A2A] text-[#F5F1E8] rounded-2xl p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95"
-                  >
-                    {/* User Info Header */}
-                    <DropdownMenuLabel className="px-3 py-2 border-b border-[#222222]">
-                      <span className="text-[10px] uppercase tracking-wider text-[#D9A441] font-semibold block">
-                        Signed In As
-                      </span>
-                      <span className="text-sm font-serif font-medium text-white block mt-0.5 truncate">
+                {/* Dropdown Menu (Exact items and styling from the provided image) */}
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-3 w-64 bg-white text-gray-800 rounded-2xl shadow-2xl border border-gray-100 py-2.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+                    
+                    {/* Header: User Name & Email */}
+                    <div className="px-4 py-2.5 border-b border-gray-100">
+                      <p className="text-sm font-bold text-gray-900 truncate">
                         {displayName}
-                      </span>
-                      <span className="text-xs text-[#777777] font-sans block truncate">
+                      </p>
+                      <p className="text-xs text-gray-400 font-sans truncate mt-0.5">
                         {email}
-                      </span>
-                    </DropdownMenuLabel>
-
-                    {/* Private / Protected Routes */}
-                    <div className="py-1">
-                      <DropdownMenuItem className="cursor-pointer focus:bg-[#1E1E1E] focus:text-[#D9A441] rounded-xl px-3 py-2 text-sm text-[#F5F1E8]/90">
-                        <Link href="/events/create" className="flex items-center gap-3 w-full">
-                          <PlusCircle className="w-4 h-4 text-[#D9A441]" />
-                          <div className="flex flex-col">
-                            <span className="font-medium">Create Event</span>
-                            <span className="text-[10px] text-[#777777]">Protected Route</span>
-                          </div>
-                        </Link>
-                      </DropdownMenuItem>
-
-                      <DropdownMenuItem className="cursor-pointer focus:bg-[#1E1E1E] focus:text-[#D9A441] rounded-xl px-3 py-2 text-sm text-[#F5F1E8]/90">
-                        <Link href="/events/manage" className="flex items-center gap-3 w-full">
-                          <CalendarDays className="w-4 h-4 text-[#D9A441]" />
-                          <div className="flex flex-col">
-                            <span className="font-medium">Manage Events</span>
-                            <span className="text-[10px] text-[#777777]">Protected Route</span>
-                          </div>
-                        </Link>
-                      </DropdownMenuItem>
-
-                      <DropdownMenuItem className="cursor-pointer focus:bg-[#1E1E1E] focus:text-[#D9A441] rounded-xl px-3 py-2 text-sm text-[#F5F1E8]/90">
-                        <Link href="/events/joined" className="flex items-center gap-3 w-full">
-                          <Ticket className="w-4 h-4 text-[#D9A441]" />
-                          <div className="flex flex-col">
-                            <span className="font-medium">Joined Events</span>
-                            <span className="text-[10px] text-[#777777]">Protected Route</span>
-                          </div>
-                        </Link>
-                      </DropdownMenuItem>
+                      </p>
                     </div>
 
-                    <DropdownMenuSeparator className="bg-[#222222] my-1" />
+                    {/* Navigation Items */}
+                    <div className="py-1.5 space-y-0.5">
+                      {/* 1. Create Event (Teal PlusCircle) */}
+                      <Link
+                        href="/events/create"
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-teal-700 hover:bg-teal-50/60 transition-colors"
+                      >
+                        <PlusCircle className="w-4 h-4 text-teal-600 shrink-0" />
+                        <span>Create Event</span>
+                      </Link>
 
-                    {/* Dropdown Logout */}
-                    <DropdownMenuItem
+                      {/* 2. Manage Events (Purple Settings) */}
+                      <Link
+                        href="/events/manage"
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-purple-700 hover:bg-purple-50/60 transition-colors"
+                      >
+                        <Settings className="w-4 h-4 text-purple-600 shrink-0" />
+                        <span>Manage Events</span>
+                      </Link>
+
+                      {/* 3. Joined Events (Green CheckCircle2) */}
+                      <Link
+                        href="/events/joined"
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-emerald-700 hover:bg-emerald-50/60 transition-colors"
+                      >
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>Joined Events</span>
+                      </Link>
+                    </div>
+
+                    {/* Separator Line */}
+                    <div className="border-t border-gray-100 my-1" />
+
+                    {/* 4. Logout (Red LogOut) */}
+                    <button
+                      type="button"
                       onClick={handleLogout}
-                      className="cursor-pointer focus:bg-red-500/10 focus:text-red-400 text-red-400 rounded-xl px-3 py-2 text-sm font-medium"
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm font-medium text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                     >
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Sign Out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                {/* Hover Tooltip: User Display Name */}
-                <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-3 py-1 bg-[#181818] text-[#F5F1E8] border border-[#D9A441]/40 rounded-lg text-xs font-medium whitespace-nowrap shadow-xl opacity-0 pointer-events-none group-hover/user:opacity-100 transition-opacity duration-200 z-40 flex items-center gap-1.5">
-                  <Sparkles className="w-3 h-3 text-[#D9A441]" />
-                  <span>{displayName}</span>
-                </div>
+                      <LogOut className="w-4 h-4 text-red-500 shrink-0" />
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                )}
               </div>
 
-              {/* Dedicated Navbar Logout Button */}
+              {/* Dedicated Navbar Logout Button (Matching screenshot) */}
               <Button
                 variant="outline"
                 onClick={handleLogout}
-                className="border-[#777777]/40 hover:border-[#D9A441] text-[#F5F1E8] hover:text-[#D9A441] bg-transparent hover:bg-white/5 rounded-xl text-sm font-medium px-4 py-2 transition-all cursor-pointer"
+                className="border-gray-300/40 hover:border-red-400 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl text-sm font-medium px-4 py-2 transition-all cursor-pointer flex items-center gap-2"
               >
-                <LogOut className="w-4 h-4 mr-1.5" />
-                Logout
+                <LogOut className="w-4 h-4 text-red-400" />
+                <span>Logout</span>
               </Button>
             </div>
           )}
@@ -282,7 +282,7 @@ export default function Navbar() {
 
               <div className="space-y-6">
                 <Link
-                  href="/#upcoming"
+                  href="/upcoming-events"
                   onClick={() => setIsMobileSheetOpen(false)}
                   className="flex items-center gap-3 text-sm font-medium text-[#F5F1E8] hover:text-[#D9A441] py-2 border-b border-[#222222]"
                 >
@@ -313,25 +313,25 @@ export default function Navbar() {
                       <Link
                         href="/events/create"
                         onClick={() => setIsMobileSheetOpen(false)}
-                        className="flex items-center gap-3 text-sm text-[#F5F1E8] hover:text-[#D9A441] py-2 px-1"
+                        className="flex items-center gap-3 text-sm text-[#F5F1E8] hover:text-teal-400 py-2 px-1"
                       >
-                        <PlusCircle className="w-4 h-4 text-[#D9A441]" />
+                        <PlusCircle className="w-4 h-4 text-teal-400" />
                         Create Event
                       </Link>
                       <Link
                         href="/events/manage"
                         onClick={() => setIsMobileSheetOpen(false)}
-                        className="flex items-center gap-3 text-sm text-[#F5F1E8] hover:text-[#D9A441] py-2 px-1"
+                        className="flex items-center gap-3 text-sm text-[#F5F1E8] hover:text-purple-400 py-2 px-1"
                       >
-                        <CalendarDays className="w-4 h-4 text-[#D9A441]" />
+                        <Settings className="w-4 h-4 text-purple-400" />
                         Manage Events
                       </Link>
                       <Link
                         href="/events/joined"
                         onClick={() => setIsMobileSheetOpen(false)}
-                        className="flex items-center gap-3 text-sm text-[#F5F1E8] hover:text-[#D9A441] py-2 px-1"
+                        className="flex items-center gap-3 text-sm text-[#F5F1E8] hover:text-emerald-400 py-2 px-1"
                       >
-                        <Ticket className="w-4 h-4 text-[#D9A441]" />
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                         Joined Events
                       </Link>
                     </div>
@@ -342,9 +342,9 @@ export default function Navbar() {
                         handleLogout();
                         setIsMobileSheetOpen(false);
                       }}
-                      className="w-full mt-4 border-[#777777]/40 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl py-2.5"
+                      className="w-full mt-4 border-red-500/30 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl py-2.5 flex items-center justify-center gap-2"
                     >
-                      <LogOut className="w-4 h-4 mr-2" />
+                      <LogOut className="w-4 h-4 text-red-400" />
                       Logout
                     </Button>
                   </div>

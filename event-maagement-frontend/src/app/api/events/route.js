@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { MongoClient } from "mongodb";
 
+// export const dynamic = "force-dynamic";
+
 const uri = process.env.MONGODB_URL;
 let client;
 let clientPromise;
@@ -16,6 +18,7 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const eventType = searchParams.get("eventType");
     const timeframe = searchParams.get("timeframe");
+    const limit = searchParams.get("limit");
     const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 
     // Try Express backend first if available
@@ -59,7 +62,13 @@ export async function GET(request) {
       sortOrder = -1;
     }
 
-    const events = await collection.find(query).sort({ eventDate: sortOrder }).toArray();
+    let cursor = collection.find(query).sort({ eventDate: sortOrder });
+    const limitNum = parseInt(limit, 10);
+    if (!isNaN(limitNum) && limitNum > 0) {
+      cursor = cursor.limit(limitNum);
+    }
+
+    const events = await cursor.toArray();
     return NextResponse.json(events);
   } catch (error) {
     console.error("API /events error:", error);
