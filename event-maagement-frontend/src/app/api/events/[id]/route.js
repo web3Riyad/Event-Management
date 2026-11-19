@@ -71,3 +71,186 @@ export async function GET(request, { params }) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+// PUT update an event (Only the creator can update)
+export async function PUT(request, { params }) {
+  try {
+    const { id } = await params;
+    const body = await request.json();
+    const {
+      eventTitle,
+      eventType,
+      eventDate,
+      location,
+      thumbnailImageUrl,
+      eventDescription,
+      userEmail,
+    } = body;
+
+    if (!userEmail) {
+      return NextResponse.json(
+        { error: "Authentication required. userEmail missing." },
+        { status: 401 }
+      );
+    }
+
+    // 1. Try Express backend first
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1500);
+      const backendRes = await fetch(`${backendUrl}/events/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      if (backendRes.ok || backendRes.status === 403 || backendRes.status === 404) {
+        const data = await backendRes.json();
+        return NextResponse.json(data, { status: backendRes.status });
+      }
+    } catch {
+      // Backend offline, fallback to direct MongoDB
+    }
+
+    // 2. Direct MongoDB fallback
+    if (!clientPromise) {
+      return NextResponse.json({ error: "Database not available" }, { status: 500 });
+    }
+
+    const connectedClient = await clientPromise;
+    const db = connectedClient.db("EventManagement");
+    const eventsCollection = db.collection("event");
+    const joinedCollection = db.collection("joinedEvents");
+
+    let query = {};
+    if (ObjectId.isValid(id)) {
+      query = { $or: [{ _id: new ObjectId(id) }, { _id: id }] };
+    } else {
+      query = { _id: id };
+    }
+
+    const event = await eventsCollection.findOne(query);
+    if (!event) {
+      return NextResponse.json({ error: "Event not found" }, { status: 404 });
+    }
+
+    // Security check: Only creator can update
+    if (event.creatorEmail && event.creatorEmail.toLowerCase() !== userEmail.toLowerCase()) {
+      return NextResponse.json(
+        { error: "Forbidden: You can only update events created by you." },
+        { status: 403 }
+      );
+    }
+
+    const updateFields = {};
+    if (eventTitle) updateFields.eventTitle = eventTitle.trim();
+    if (eventType) updateFields.eventType = eventType.trim();
+    if (eventDate) updateFields.eventDate = eventDate.trim();
+    if (location !== undefined) updateFields.location = location.trim();
+    if (thumbnailImageUrl) updateFields.thumbnailImageUrl = thumbnailImageUrl.trim();
+    if (eventDescription !== undefined) updateFields.eventDescription = eventDescription.trim();
+    updateFields.updatedAt = new Date();
+
+    await eventsCollection.updateOne(query, { $set: updateFields });
+
+    // Also update denormalized joinedEvents
+    await joinedCollection.updateMany(
+      { $or: [{ eventId: id }, { eventId: String(event._id) }] },
+      {
+        $set: {
+          eventTitle: updateFields.eventTitle || event.eventTitle,
+          eventType: updateFields.eventType || event.eventType,
+          eventDate: updateFields.eventDate || event.eventDate,
+          location: updateFields.location !== undefined ? updateFields.location : event.location,
+          thumbnailImageUrl: updateFields.thumbnailImageUrl || event.thumbnailImageUrl,
+        },
+      }
+    );
+
+    return NextResponse.json({ message: "Event updated successfully", updateFields });
+  } catch (error) {
+    console.error("PUT /api/events/[id] error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+// DELETE an event (Only the creator can delete)
+export async function DELETE(request, { params }) {
+  try {
+    const { id } = await params;
+    const { searchParams } = new URL(request.url);
+    const userEmail = searchParams.get("userEmail");
+
+    if (!userEmail) {
+      return NextResponse.json(
+        { error: "Authentication required. userEmail missing." },
+        { status: 401 }
+      );
+    }
+
+    // 1. Try Express backend first
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1500);
+      const backendRes = await fetch(
+        `${backendUrl}/events/${id}?userEmail=${encodeURIComponent(userEmail)}`,
+        {
+          method: "DELETE",
+          signal: controller.signal,
+        }
+      );
+      clearTimeout(timeoutId);
+      if (backendRes.ok || backendRes.status === 403 || backendRes.status === 404) {
+        const data = await backendRes.json();
+        return NextResponse.json(data, { status: backendRes.status });
+      }
+    } catch {
+      // Backend offline, fallback to direct MongoDB
+    }
+
+    // 2. Direct MongoDB fallback
+    if (!clientPromise) {
+      return NextResponse.json({ error: "Database not available" }, { status: 500 });
+    }
+
+    const connectedClient = await clientPromise;
+    const db = connectedClient.db("EventManagement");
+    const eventsCollection = db.collection("event");
+    const joinedCollection = db.collection("joinedEvents");
+
+    let query = {};
+    if (ObjectId.isValid(id)) {
+      query = { $or: [{ _id: new ObjectId(id) }, { _id: id }] };
+    } else {
+      query = { _id: id };
+    }
+
+    const event = await eventsCollection.findOne(query);
+    if (!event) {
+      return NextResponse.json({ error: "Event not found" }, { status: 404 });
+    }
+
+    // Security check: Only creator can delete
+    if (event.creatorEmail && event.creatorEmail.toLowerCase() !== userEmail.toLowerCase()) {
+      return NextResponse.json(
+        { error: "Forbidden: You can only delete events created by you." },
+        { status: 403 }
+      );
+    }
+
+    await eventsCollection.deleteOne(query);
+
+    // Clean up related joinedEvents
+    await joinedCollection.deleteMany({
+      $or: [{ eventId: id }, { eventId: String(event._id) }],
+    });
+
+    return NextResponse.json({ message: "Event deleted successfully", deletedId: id });
+  } catch (error) {
+    console.error("DELETE /api/events/[id] error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}

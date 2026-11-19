@@ -229,8 +229,8 @@ app.get('/events/:id/join', async (req, res) => {
   }
 });
 
-// GET all joined events for a user
-app.get('/user/joined-events', async (req, res) => {
+// GET all joined events for a user (sorted by eventDate)
+app.get(['/user/joined-events', '/events/joined'], async (req, res) => {
   try {
     const { userEmail } = req.query;
     if (!userEmail) {
@@ -238,7 +238,7 @@ app.get('/user/joined-events', async (req, res) => {
     }
     const joined = await joinedEventsCollection
       .find({ userEmail })
-      .sort({ joinedAt: -1 })
+      .sort({ eventDate: 1, joinedAt: -1 })
       .toArray();
     res.json(joined);
   } catch (err) {
@@ -289,6 +289,122 @@ app.post('/events', async (req, res) => {
   } catch (err) {
     console.error("Error creating event:", err);
     res.status(500).json({ error: 'Failed to create event', details: err.message });
+  }
+});
+
+// GET all created events for a creator
+app.get(['/events/creator', '/user/created-events'], async (req, res) => {
+  try {
+    const { creatorEmail } = req.query;
+    if (!creatorEmail) {
+      return res.status(400).json({ error: 'creatorEmail query parameter is required' });
+    }
+    const events = await eventsCollection
+      .find({ creatorEmail })
+      .sort({ createdAt: -1 })
+      .toArray();
+    res.json(events);
+  } catch (err) {
+    console.error("Error fetching created events:", err);
+    res.status(500).json({ error: 'Failed to fetch created events' });
+  }
+});
+
+// PUT update an event (Only creator can update)
+app.put('/events/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      eventTitle,
+      eventType,
+      eventDate,
+      location,
+      thumbnailImageUrl,
+      eventDescription,
+      userEmail,
+    } = req.body;
+
+    if (!userEmail) {
+      return res.status(401).json({ error: 'Authentication required. userEmail missing.' });
+    }
+
+    let query = ObjectId.isValid(id) ? { $or: [{ _id: new ObjectId(id) }, { _id: id }] } : { _id: id };
+    const event = await eventsCollection.findOne(query);
+
+    if (!event) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+
+    // Authorization: only the creator can update
+    if (event.creatorEmail && event.creatorEmail.toLowerCase() !== userEmail.toLowerCase()) {
+      return res.status(403).json({ error: 'Forbidden: You can only update events created by you.' });
+    }
+
+    const updateFields = {};
+    if (eventTitle) updateFields.eventTitle = eventTitle.trim();
+    if (eventType) updateFields.eventType = eventType.trim();
+    if (eventDate) updateFields.eventDate = eventDate.trim();
+    if (location !== undefined) updateFields.location = location.trim();
+    if (thumbnailImageUrl) updateFields.thumbnailImageUrl = thumbnailImageUrl.trim();
+    if (eventDescription !== undefined) updateFields.eventDescription = eventDescription.trim();
+    updateFields.updatedAt = new Date();
+
+    await eventsCollection.updateOne(query, { $set: updateFields });
+
+    // Also update denormalized joinedEvents if event info changed
+    await joinedEventsCollection.updateMany(
+      { $or: [{ eventId: id }, { eventId: String(event._id) }] },
+      {
+        $set: {
+          eventTitle: updateFields.eventTitle || event.eventTitle,
+          eventType: updateFields.eventType || event.eventType,
+          eventDate: updateFields.eventDate || event.eventDate,
+          location: updateFields.location !== undefined ? updateFields.location : event.location,
+          thumbnailImageUrl: updateFields.thumbnailImageUrl || event.thumbnailImageUrl,
+        },
+      }
+    );
+
+    res.json({ message: 'Event updated successfully', updatedFields });
+  } catch (err) {
+    console.error("Error updating event:", err);
+    res.status(500).json({ error: 'Failed to update event', details: err.message });
+  }
+});
+
+// DELETE an event (Only creator can delete)
+app.delete('/events/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userEmail } = req.query;
+
+    if (!userEmail) {
+      return res.status(401).json({ error: 'Authentication required. userEmail missing.' });
+    }
+
+    let query = ObjectId.isValid(id) ? { $or: [{ _id: new ObjectId(id) }, { _id: id }] } : { _id: id };
+    const event = await eventsCollection.findOne(query);
+
+    if (!event) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+
+    // Authorization: only the creator can delete
+    if (event.creatorEmail && event.creatorEmail.toLowerCase() !== userEmail.toLowerCase()) {
+      return res.status(403).json({ error: 'Forbidden: You can only delete events created by you.' });
+    }
+
+    await eventsCollection.deleteOne(query);
+
+    // Clean up related joinedEvents records
+    await joinedEventsCollection.deleteMany({
+      $or: [{ eventId: id }, { eventId: String(event._id) }],
+    });
+
+    res.json({ message: 'Event deleted successfully', deletedId: id });
+  } catch (err) {
+    console.error("Error deleting event:", err);
+    res.status(500).json({ error: 'Failed to delete event', details: err.message });
   }
 });
 
