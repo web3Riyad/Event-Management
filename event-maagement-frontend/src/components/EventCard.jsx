@@ -26,6 +26,7 @@ export default function EventCard({ event, isPast = false }) {
     "https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?w=1200";
 
   const eventId = event._id || "";
+  const isDataUrl = Boolean(event.thumbnailImageUrl?.startsWith("data:"));
 
   // Past event card styling
   if (isPast) {
@@ -36,6 +37,7 @@ export default function EventCard({ event, isPast = false }) {
             src={event.thumbnailImageUrl || fallbackImage}
             alt={event.eventTitle || "Past Event"}
             fill
+            unoptimized={isDataUrl}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover grayscale-[30%] group-hover:grayscale-0 transition-all duration-500"
           />
@@ -90,6 +92,7 @@ export default function EventCard({ event, isPast = false }) {
           src={event.thumbnailImageUrl || fallbackImage}
           alt={event.eventTitle || "Event Thumbnail"}
           fill
+          unoptimized={isDataUrl}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
         />

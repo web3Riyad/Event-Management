@@ -145,7 +145,7 @@ export default function Navbar() {
               </Link>
             </div>
           ) : (
-            /* If logged in -> Show Profile Picture (Dropdown matching screenshot) + Navbar Logout button */
+            /* If logged in -> Show Profile Avatar Dropdown + Navbar Logout button */
             <div className="flex items-center gap-4">
               
               {/* Profile Avatar Trigger & Dropdown Menu */}

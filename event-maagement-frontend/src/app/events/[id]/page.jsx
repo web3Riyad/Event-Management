@@ -208,6 +208,7 @@ export default function EventDetailsPage({ params }) {
               alt={event.eventTitle || "Event Photo"}
               fill
               priority
+              unoptimized={Boolean(event.thumbnailImageUrl?.startsWith("data:"))}
               sizes="(max-width: 1024px) 100vw, 1024px"
               className="object-cover"
             />

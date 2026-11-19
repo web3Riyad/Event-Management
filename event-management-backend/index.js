@@ -257,6 +257,9 @@ app.post('/events', async (req, res) => {
       location,
       thumbnailImageUrl,
       eventDescription,
+      creatorEmail,
+      creatorName,
+      creatorId,
     } = req.body;
 
     if (!eventTitle || !eventType || !eventDate) {
@@ -264,12 +267,16 @@ app.post('/events', async (req, res) => {
     }
 
     const newEvent = {
-      eventTitle,
-      eventType,
-      eventDate,
-      location: location || '',
-      thumbnailImageUrl: thumbnailImageUrl || '',
-      eventDescription: eventDescription || '',
+      eventTitle: eventTitle.trim(),
+      eventType: eventType.trim(),
+      eventDate: eventDate.trim(),
+      location: location ? location.trim() : '',
+      thumbnailImageUrl: thumbnailImageUrl ? thumbnailImageUrl.trim() : 'https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?w=1200',
+      eventDescription: eventDescription ? eventDescription.trim() : '',
+      creatorEmail: creatorEmail || null,
+      creatorName: creatorName || null,
+      creatorId: creatorId || null,
+      joinedCount: 0,
       createdAt: new Date(),
     };
 

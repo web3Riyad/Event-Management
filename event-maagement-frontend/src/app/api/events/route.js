@@ -73,3 +73,90 @@ export async function GET(request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+// POST create a new event
+export async function POST(request) {
+  try {
+    const body = await request.json();
+    const {
+      eventTitle,
+      eventType,
+      eventDate,
+      location,
+      thumbnailImageUrl,
+      eventDescription,
+      creatorEmail,
+      creatorName,
+      creatorId,
+    } = body;
+
+    if (!eventTitle || !eventType || !eventDate) {
+      return NextResponse.json(
+        { error: "eventTitle, eventType, and eventDate are required" },
+        { status: 400 }
+      );
+    }
+
+    // 1. Try Express backend first if available
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1500);
+      const backendRes = await fetch(`${backendUrl}/events`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      if (backendRes.ok) {
+        const data = await backendRes.json();
+        return NextResponse.json(data, { status: 201 });
+      }
+    } catch {
+      // Backend not running, fallback to direct MongoDB
+    }
+
+    // 2. Direct MongoDB fallback
+    if (!clientPromise) {
+      return NextResponse.json(
+        { error: "Database connection not available" },
+        { status: 500 }
+      );
+    }
+
+    const connectedClient = await clientPromise;
+    const db = connectedClient.db("EventManagement");
+    const collection = db.collection("event");
+
+    const newEvent = {
+      eventTitle: eventTitle.trim(),
+      eventType: eventType.trim(),
+      eventDate: eventDate.trim(),
+      location: location ? location.trim() : "",
+      thumbnailImageUrl: thumbnailImageUrl
+        ? thumbnailImageUrl.trim()
+        : "https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?w=1200",
+      eventDescription: eventDescription ? eventDescription.trim() : "",
+      creatorEmail: creatorEmail || null,
+      creatorName: creatorName || null,
+      creatorId: creatorId || null,
+      joinedCount: 0,
+      createdAt: new Date(),
+    };
+
+    const result = await collection.insertOne(newEvent);
+
+    return NextResponse.json(
+      {
+        message: "Event created successfully",
+        insertedId: result.insertedId,
+        event: newEvent,
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("POST /api/events error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
