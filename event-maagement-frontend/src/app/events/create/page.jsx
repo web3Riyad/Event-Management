@@ -191,13 +191,10 @@ export default function CreateEventPage() {
 
       setSuccess(true);
 
-      // Navigate to the newly created event details page or upcoming events
+      // Show success message and redirect to Upcoming Events page per requirement
       setTimeout(() => {
-        if (data.insertedId) {
-          router.push(`/events/${data.insertedId}`);
-        } else {
-          router.push("/upcoming-events");
-        }
+        router.push("/upcoming-events");
+        router.refresh();
       }, 1200);
     } catch (err) {
       console.error("Error creating event:", err);

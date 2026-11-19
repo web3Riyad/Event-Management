@@ -1,65 +1,133 @@
-import React from 'react'
-import Link from 'next/link'
+"use client";
 
+import React from "react";
+import Link from "next/link";
+import Image from "next/image";
+import {
+  HeartHandshake,
+  Mail,
+  MapPin,
+  Calendar,
+  Sparkles,
+  ArrowRight,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
 
-const Footer = () => {
+export default function Footer() {
   return (
-    <footer className="bg-[#101010] text-[#F5F1E8] border-t border-[#222222] pt-16 pb-12 mt-auto">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
-          <div className="md:col-span-2">
-            <span className="text-2xl font-serif font-semibold tracking-wide text-white">
-              UNIQUE<span className="text-[#D9A441]">.</span>
+    <footer className="bg-[#0c0c0c] text-[#F5F1E8] border-t border-[#222222] pt-16 pb-12 mt-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+        {/* Brand & Mission Statement */}
+        <div className="md:col-span-2 space-y-4">
+          <Link href="/" className="inline-flex items-center gap-3">
+            <div className="relative w-10 h-10 rounded-full overflow-hidden p-1 bg-[#181818] border border-[#D9A441]/40 shadow-md">
+              <Image
+                src="/logo.png"
+                alt="UNIQUE Events Logo"
+                width={40}
+                height={40}
+                className="object-contain w-full h-full"
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-2xl font-serif font-bold tracking-tight text-[#D9A441]">
+                UNIQUE<span className="text-[#0f766e]">.</span>
+              </span>
+              <span className="text-[10px] uppercase tracking-[0.22em] text-[#777777] font-sans font-medium">
+                Community Event Management
+              </span>
+            </div>
+          </Link>
+
+          <p className="text-sm text-[#888888] max-w-md leading-relaxed font-sans">
+            Empowering communities and transforming lives through grassroots volunteerism,
+            environmental cleanups, tree plantations, winter relief drives, and social welfare
+            initiatives across our cities.
+          </p>
+
+          <div className="flex items-center gap-4 pt-2 text-xs text-[#0f766e]">
+            <span className="flex items-center gap-1.5 font-semibold">
+              <HeartHandshake className="w-4 h-4 text-[#D9A441]" />
+              100% Grassroots Driven
             </span>
-            <p className="mt-4 text-sm text-[#777777] max-w-sm leading-relaxed">
-              Crafting transcendent experiences for discerning hosts, cultural institutions, and
-              world-class enterprises.
-            </p>
-          </div>
-
-          <div>
-            <h4 className="text-xs uppercase tracking-[0.2em] text-[#D9A441] font-semibold mb-4">
-              Navigation
-            </h4>
-            <ul className="space-y-2 text-sm text-[#F5F1E8]/80">
-              <li>
-                <Link href="#featured" className="hover:text-[#D9A441] transition-colors">
-                  Featured Events
-                </Link>
-              </li>
-              <li>
-                <Link href="#services" className="hover:text-[#D9A441] transition-colors">
-                  Services & Galas
-                </Link>
-              </li>
-              <li>
-                <Link href="/login" className="hover:text-[#D9A441] transition-colors">
-                  Client Portal
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-xs uppercase tracking-[0.2em] text-[#D9A441] font-semibold mb-4">
-              Private Inquiries
-            </h4>
-            <p className="text-sm text-[#777777] mb-2">concierge@elite-events.com</p>
-            <p className="text-sm text-[#777777]">+1 (800) 845-9200</p>
+            <span>•</span>
+            <span className="flex items-center gap-1.5 font-semibold">
+              <ShieldCheck className="w-4 h-4 text-[#0f766e]" />
+              Verified Community Action
+            </span>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 pt-8 border-t border-[#222222] flex flex-col sm:flex-row items-center justify-between text-xs text-[#777777] gap-4">
-          <p>© 2026 Élite Events Management. All rights reserved.</p>
-          <div className="flex gap-6">
-            <span className="hover:text-[#F5F1E8] cursor-pointer transition-colors">Privacy</span>
-            <span className="hover:text-[#F5F1E8] cursor-pointer transition-colors">Terms</span>
-            <span className="hover:text-[#F5F1E8] cursor-pointer transition-colors">Concierge</span>
-          </div>
+        {/* Quick Navigation Links */}
+        <div>
+          <h4 className="text-xs uppercase tracking-[0.2em] text-[#D9A441] font-semibold mb-4">
+            Platform Navigation
+          </h4>
+          <ul className="space-y-2.5 text-sm text-[#F5F1E8]/80 font-sans">
+            <li>
+              <Link href="/upcoming-events" className="hover:text-[#D9A441] transition-colors flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-[#0f766e]" />
+                Upcoming Events
+              </Link>
+            </li>
+            <li>
+              <Link href="/#features" className="hover:text-[#D9A441] transition-colors">
+                Platform Capabilities
+              </Link>
+            </li>
+            <li>
+              <Link href="/#gallery" className="hover:text-[#D9A441] transition-colors">
+                Past History & Gallery
+              </Link>
+            </li>
+            <li>
+              <Link href="/events/create" className="hover:text-[#D9A441] transition-colors">
+                Create a Drive
+              </Link>
+            </li>
+            <li>
+              <Link href="/events/joined" className="hover:text-[#D9A441] transition-colors">
+                Joined Events
+              </Link>
+            </li>
+          </ul>
         </div>
-      </footer>
-  )
+
+        {/* Contact & Community Inquiries */}
+        <div>
+          <h4 className="text-xs uppercase tracking-[0.2em] text-[#D9A441] font-semibold mb-4">
+            Community Desk
+          </h4>
+          <p className="text-sm text-[#888888] mb-2 flex items-center gap-2">
+            <Mail className="w-4 h-4 text-[#0f766e] shrink-0" />
+            community@unique-events.org
+          </p>
+          <p className="text-sm text-[#888888] mb-2 flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-[#D9A441] shrink-0" />
+            Dhaka, Bangladesh
+          </p>
+          <p className="text-xs text-[#666666] mt-4 leading-relaxed font-sans">
+            Have questions about organizing an initiative in your local neighborhood? Reach out to our volunteer support team.
+          </p>
+        </div>
+      </div>
+
+      {/* Copyright Bar */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 border-t border-[#222222] flex flex-col sm:flex-row items-center justify-between text-xs text-[#777777] gap-4">
+        <p>© 2026 UNIQUE Event Management. All rights reserved.</p>
+        <div className="flex gap-6">
+          <Link href="/upcoming-events" className="hover:text-[#F5F1E8] transition-colors">
+            Upcoming Drives
+          </Link>
+          <Link href="/login" className="hover:text-[#F5F1E8] transition-colors">
+            Volunteer Sign In
+          </Link>
+          <Link href="/register" className="hover:text-[#F5F1E8] transition-colors">
+            Register Account
+          </Link>
+        </div>
+      </div>
+    </footer>
+  );
 }
-
-export default Footer
-
-

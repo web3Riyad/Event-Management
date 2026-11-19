@@ -11,5 +11,15 @@ export const auth = betterAuth({
   }),
   emailAndPassword: { 
     enabled: true, 
-  }, 
+  },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID?.trim() || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET?.trim() || "",
+    },
+    github: {
+      clientId: process.env.GITHUB_CLIENT_ID?.trim() || "",
+      clientSecret: process.env.GITHUB_CLIENT_SECRET?.trim() || "",
+    },
+  },
 });

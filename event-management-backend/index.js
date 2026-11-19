@@ -411,3 +411,5 @@ app.delete('/events/:id', async (req, res) => {
 app.listen(port, () => {
   console.log(`Event Management Backend running on http://localhost:${port}`);
 });
+
+

@@ -2,6 +2,7 @@ import HeroPart from "@/components/Hero";
 import FeaturesSection from "@/components/FeaturesSection";
 import RecentEventsSection from "@/components/RecentEventsSection";
 import GallerySection from "@/components/GallerySection";
+import NewsletterSection from "@/components/NewsletterSection";
 
 export const metadata = {
   title: "UNIQUE - Community Service & Social Development Events",
@@ -23,6 +24,9 @@ export default function Home() {
 
       {/* 4. Gallery Section: Static photographs of past community service initiatives */}
       <GallerySection />
+
+      {/* 5. Newsletter Section: Eye-catching newsletter subscription design */}
+      <NewsletterSection />
     </main>
   );
 }

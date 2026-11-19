@@ -7,8 +7,6 @@ import { signIn } from "@/lib/auth-client";
 
 import {
   Button,
-  Description,
-  FieldError,
   Form,
   Input,
   Label,
@@ -24,30 +22,39 @@ import {
   ArrowRight,
   ShieldCheck,
   AlertCircle,
+  CheckCircle2,
 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSocialLoading, setIsSocialLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [toastMessage, setToastMessage] = useState("");
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
+    setToastMessage("");
     setIsLoading(true);
 
     const formData = new FormData(e.currentTarget);
-    const data = {};
-    formData.forEach((value, key) => {
-      data[key] = value.toString();
-    });
+    const email = formData.get("email")?.toString().trim() || "";
+    const password = formData.get("password")?.toString() || "";
+    const remember = Boolean(formData.get("remember"));
+
+    if (!email || !password) {
+      setErrorMessage("Please enter both email and password.");
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const { data: resdata, error } = await signIn.email({
-        email: data.email,
-        password: data.password,
-        rememberMe: Boolean(data.remember),
+        email,
+        password,
+        rememberMe: remember,
         callbackURL: "/",
       });
 
@@ -57,8 +64,12 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/");
-      router.refresh();
+      setToastMessage("Login successful! Welcome back.");
+
+      setTimeout(() => {
+        router.push("/");
+        router.refresh();
+      }, 1000);
     } catch (err) {
       setErrorMessage(err?.message || "An unexpected error occurred during sign in.");
     } finally {
@@ -66,10 +77,32 @@ export default function LoginPage() {
     }
   };
 
+  // Social Sign In (Google & GitHub)
+  const handleSocialSignIn = async (provider) => {
+    try {
+      setIsSocialLoading(true);
+      setErrorMessage("");
+      await signIn.social({
+        provider:"google",
+        callbackURL: "/",
+      });
+    } catch (err) {
+      setErrorMessage(err?.message || `${provider} sign in failed. Please try email login.`);
+      setIsSocialLoading(false);
+    }
+  };
+
   return (
-    <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center py-16 px-4 sm:px-6 bg-[#F5F1E8]">
+    <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center py-16 px-4 sm:px-6 bg-[#FAF8F5]">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed top-6 right-6 z-50 bg-emerald-600 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
+          <CheckCircle2 className="w-5 h-5 text-white" />
+          <span className="text-sm font-semibold">{toastMessage}</span>
+        </div>
+      )}
+
       <div className="w-full max-w-md bg-[#101010] text-[#F5F1E8] rounded-3xl border border-[#262626] shadow-2xl p-8 sm:p-10 relative overflow-hidden">
-        
         {/* Subtle decorative gold glow */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-[#D9A441]/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-[#D9A441]/5 rounded-full blur-3xl pointer-events-none" />
@@ -83,7 +116,7 @@ export default function LoginPage() {
             Welcome Back
           </h1>
           <p className="text-sm text-[#777777] font-sans mt-2">
-            Enter your credentials to access your private events portfolio
+            Enter your credentials to access your community account
           </p>
         </div>
 
@@ -95,22 +128,14 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* HeroUI Organized Form */}
+        {/* Form */}
         <Form className="flex flex-col gap-5 relative z-10" onSubmit={onSubmit}>
-          
-          {/* Email Field */}
+          {/* Email Address */}
           <TextField
             isRequired
             name="email"
             type="email"
             className="flex flex-col gap-1.5 w-full"
-            validate={(value) => {
-              if (!value) return "Email is required";
-              if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(value)) {
-                return "Please enter a valid email address";
-              }
-              return null;
-            }}
           >
             <Label className="text-xs font-semibold uppercase tracking-wider text-[#D9A441]">
               Email Address
@@ -118,45 +143,22 @@ export default function LoginPage() {
             <div className="relative flex items-center">
               <Mail className="absolute left-3.5 w-4 h-4 text-[#777777] pointer-events-none" />
               <Input
-                placeholder="vip.client@domain.com"
+                placeholder="name@example.com"
                 className="w-full pl-10 pr-4 py-3 bg-[#181818] border border-[#2E2E2E] focus:border-[#D9A441] text-white placeholder-[#555555] rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#D9A441]/40"
               />
             </div>
-            <FieldError className="text-xs text-red-400 mt-1" />
           </TextField>
 
-          {/* Password Field */}
+          {/* Password */}
           <TextField
             isRequired
-            minLength={8}
             name="password"
             type={showPassword ? "text" : "password"}
             className="flex flex-col gap-1.5 w-full"
-            validate={(value) => {
-              if (!value) return "Password is required";
-              if (value.length < 8) {
-                return "Password must be at least 8 characters";
-              }
-              if (!/[A-Z]/.test(value)) {
-                return "Must contain at least one uppercase letter";
-              }
-              if (!/[0-9]/.test(value)) {
-                return "Must contain at least one number";
-              }
-              return null;
-            }}
           >
-            <div className="flex items-center justify-between">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-[#D9A441]">
-                Password
-              </Label>
-              <Link
-                href="/forgot-password"
-                className="text-xs text-[#777777] hover:text-[#D9A441] transition-colors"
-              >
-                Forgot password?
-              </Link>
-            </div>
+            <Label className="text-xs font-semibold uppercase tracking-wider text-[#D9A441]">
+              Password
+            </Label>
             <div className="relative flex items-center">
               <Lock className="absolute left-3.5 w-4 h-4 text-[#777777] pointer-events-none" />
               <Input
@@ -172,10 +174,6 @@ export default function LoginPage() {
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
-            <Description className="text-[11px] text-[#777777] mt-0.5">
-              Must be at least 8 characters with 1 uppercase and 1 number
-            </Description>
-            <FieldError className="text-xs text-red-400 mt-1" />
           </TextField>
 
           {/* Remember Me Option */}
@@ -190,30 +188,76 @@ export default function LoginPage() {
             </label>
           </div>
 
-          {/* Submit and Reset Actions */}
+          {/* Email Submit Action */}
           <div className="flex flex-col gap-3 pt-2">
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || isSocialLoading}
               className="w-full bg-[#D9A441] hover:bg-[#C59333] text-[#101010] font-semibold text-sm py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer disabled:opacity-50"
             >
               {isLoading ? (
-                <span>Authenticating...</span>
+                <span>Logging In...</span>
               ) : (
                 <>
                   <LogIn className="w-4 h-4" />
-                  <span>Sign In</span>
+                  <span>Log In</span>
                   <ArrowRight className="w-4 h-4 ml-auto" />
                 </>
               )}
             </Button>
+          </div>
 
-            <Button
-              type="reset"
-              className="w-full bg-transparent hover:bg-white/5 border border-[#2E2E2E] hover:border-[#777777] text-[#777777] hover:text-white text-xs font-medium py-2 rounded-xl transition-all cursor-pointer"
+          {/* Divider */}
+          <div className="relative flex py-2 items-center">
+            <div className="flex-grow border-t border-[#262626]" />
+            <span className="flex-shrink mx-4 text-xs uppercase tracking-wider text-[#777777]">
+              Or continue with
+            </span>
+            <div className="flex-grow border-t border-[#262626]" />
+          </div>
+
+          {/* Social Sign In Buttons (Google & GitHub) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Google */}
+            <button
+              type="button"
+              onClick={() => handleSocialSignIn("google")}
+              disabled={isLoading || isSocialLoading}
+              className="flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-[#2E2E2E] hover:border-[#777777] text-white text-xs font-semibold transition-all duration-200 cursor-pointer disabled:opacity-50"
             >
-              Clear Fields
-            </Button>
+              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                />
+              </svg>
+              <span>Google Login</span>
+            </button>
+
+            {/* GitHub */}
+            <button
+              type="button"
+              onClick={() => handleSocialSignIn("github")}
+              disabled={isLoading || isSocialLoading}
+              className="flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-[#2E2E2E] hover:border-[#777777] text-white text-xs font-semibold transition-all duration-200 cursor-pointer disabled:opacity-50"
+            >
+              <svg className="w-4 h-4 fill-white shrink-0" viewBox="0 0 24 24">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+              </svg>
+              <span>GitHub Login</span>
+            </button>
           </div>
 
           {/* Security Badge */}
@@ -223,17 +267,16 @@ export default function LoginPage() {
           </div>
         </Form>
 
-        {/* Footer Link to Sign Up */}
+        {/* Footer Link to Register Page */}
         <div className="mt-8 pt-6 border-t border-[#222222] text-center text-xs text-[#777777] relative z-10">
           Don&apos;t have an account yet?{" "}
           <Link
-            href="/signup"
+            href="/register"
             className="text-[#D9A441] hover:text-[#C59333] font-semibold hover:underline ml-1 transition-colors"
           >
-            Create an Account
+            Register here
           </Link>
         </div>
-
       </div>
     </div>
   );

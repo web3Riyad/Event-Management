@@ -120,41 +120,42 @@ export default function Navbar() {
         {/* 3. Conditional Login/Logout (Desktop) */}
         <div className="hidden md:flex items-center gap-3">
           {!isLoggedIn ? (
-            /* If not logged in -> Show Sign In & Sign Up links */
+            /* If not logged in -> Show Login and Register buttons */
             <div className="flex items-center gap-3">
               <Link
-                href="/signin"
+                href="/login"
                 className={cn(
                   buttonVariants({ variant: "ghost" }),
                   "text-[#F5F1E8] hover:text-[#D9A441] hover:bg-white/5 text-sm font-medium px-4 py-2 rounded-xl transition-all cursor-pointer"
                 )}
               >
                 <LogIn className="w-4 h-4 mr-1.5" />
-                Sign In
+                Login
               </Link>
 
               <Link
-                href="/signup"
+                href="/register"
                 className={cn(
                   buttonVariants({ variant: "default" }),
                   "bg-[#D9A441] hover:bg-[#C59333] text-[#101010] font-semibold text-sm px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
                 )}
               >
                 <UserPlus className="w-4 h-4 mr-1.5" />
-                Sign Up
+                Register
               </Link>
             </div>
           ) : (
-            /* If logged in -> Show Profile Avatar Dropdown + Navbar Logout button */
+            /* If logged in -> Show Profile Avatar Dropdown (with hover display name) + Navbar Logout button */
             <div className="flex items-center gap-4">
               
               {/* Profile Avatar Trigger & Dropdown Menu */}
-              <div className="relative" ref={dropdownRef}>
+              <div className="relative group/avatar" ref={dropdownRef}>
                 <button
                   type="button"
                   onClick={() => setIsDropdownOpen((prev) => !prev)}
+                  title={displayName}
                   className="flex items-center gap-2 p-1 rounded-full bg-black/40 hover:bg-black/60 border border-[#D9A441]/50 hover:border-[#D9A441] transition-all focus:outline-none focus:ring-2 focus:ring-[#D9A441]/60 cursor-pointer"
-                  aria-label="User account menu"
+                  aria-label={displayName}
                   aria-expanded={isDropdownOpen}
                 >
                   <Avatar className="size-9 ring-2 ring-[#D9A441]/40">
@@ -169,6 +170,13 @@ export default function Navbar() {
                     }`}
                   />
                 </button>
+
+                {/* Hover Display Name Tooltip */}
+                {!isDropdownOpen && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1 bg-black/95 text-white text-xs font-medium rounded-lg shadow-xl pointer-events-none opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-200 whitespace-nowrap z-40 border border-white/10">
+                    {displayName}
+                  </div>
+                )}
 
                 {/* Dropdown Menu (Exact items and styling from the provided image) */}
                 {isDropdownOpen && (
@@ -351,7 +359,7 @@ export default function Navbar() {
                 ) : (
                   <div className="flex flex-col gap-3 mt-4">
                     <Link
-                      href="/signin"
+                      href="/login"
                       onClick={() => setIsMobileSheetOpen(false)}
                       className={cn(
                         buttonVariants({ variant: "outline" }),
@@ -359,10 +367,10 @@ export default function Navbar() {
                       )}
                     >
                       <LogIn className="w-4 h-4 mr-2" />
-                      Sign In
+                      Login
                     </Link>
                     <Link
-                      href="/signup"
+                      href="/register"
                       onClick={() => setIsMobileSheetOpen(false)}
                       className={cn(
                         buttonVariants({ variant: "default" }),
@@ -370,7 +378,7 @@ export default function Navbar() {
                       )}
                     >
                       <UserPlus className="w-4 h-4 mr-2" />
-                      Sign Up
+                      Register
                     </Link>
                   </div>
                 )}
