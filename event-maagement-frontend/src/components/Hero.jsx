@@ -41,8 +41,8 @@ const HeroPart = () => {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              href="/upcoming-events"
-              className="w-full sm:w-auto bg-[#D9A441] hover:bg-[#C59333] text-[#101010] font-semibold px-8 py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 group"
+              href="#upcoming"
+              className="w-full sm:w-auto bg-[#D9A441] hover:bg-[#C59333] text-[#101010] font-semibold px-8 py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 group cursor-pointer"
             >
               Explore Upcoming Events
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -53,58 +53,6 @@ const HeroPart = () => {
             >
               Our Experiences
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Occasions Preview */}
-      <section id="services" className="py-24 bg-[#F5F1E8]">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <p className="text-xs uppercase tracking-[0.25em] text-[#D9A441] font-bold mb-3">
-              Signature Excellence
-            </p>
-            <h2 className="text-3xl sm:text-5xl font-serif text-[#101010] tracking-tight mb-4">
-              Prestige Experience Services
-            </h2>
-            <p className="text-[#777777] text-base leading-relaxed">
-              Every detail is meticulously planned to create atmosphere, elegance, and effortless hospitality.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: Award,
-                title: "Bespoke Design",
-                desc: "Custom architectural staging, couture floral styling, and thematic curation.",
-              },
-              {
-                icon: ShieldCheck,
-                title: "Flawless Execution",
-                desc: "Discreet protocol management, VIP coordination, and uncompromising excellence.",
-              },
-              {
-                icon: Users,
-                title: "Elite Concierge",
-                desc: "Tailored guest itineraries, Michelin-level culinary pairings, and private transport.",
-              },
-            ].map((feature, i) => (
-              <div
-                key={i}
-                className="p-8 rounded-2xl bg-white border border-[#E8E2D5] hover:border-[#D9A441]/50 hover:shadow-xl transition-all duration-300"
-              >
-                <div className="w-12 h-12 rounded-xl bg-[#101010] flex items-center justify-center text-[#D9A441] mb-6 shadow-md">
-                  <feature.icon className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-serif font-semibold text-[#101010] mb-3">
-                  {feature.title}
-                </h3>
-                <p className="text-sm text-[#777777] leading-relaxed font-sans">
-                  {feature.desc}
-                </p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
