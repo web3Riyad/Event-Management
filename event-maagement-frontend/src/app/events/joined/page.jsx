@@ -34,8 +34,16 @@ export default function JoinedEventsPage() {
   const isLoggedIn = Boolean(session?.user);
   const user = session?.user;
 
+  // Direct redirect to login page if user is not authenticated (no middle stage)
+  useEffect(() => {
+    if (!isPending && !isLoggedIn) {
+      window.location.replace("/login?redirect=/events/joined");
+    }
+  }, [isPending, isLoggedIn]);
+
   // 1. Fetch all events joined by the logged-in user
   useEffect(() => {
+    if (!isLoggedIn || !user?.email) return;
     let isMounted = true;
 
     async function fetchJoinedEvents() {
@@ -107,55 +115,9 @@ export default function JoinedEventsPage() {
     return result;
   }, [events, searchQuery, sortDirection]);
 
-  // Loading Session State
-  if (isPending) {
-    return (
-      <main className="min-h-screen bg-[#FAF8F5] pt-32 pb-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-pulse space-y-6">
-          <div className="h-8 bg-gray-200 rounded w-64 mx-auto" />
-          <div className="h-4 bg-gray-200 rounded w-96 mx-auto" />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
-            {[1, 2, 3].map((n) => (
-              <div key={n} className="h-72 bg-gray-200 rounded-2xl" />
-            ))}
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  // Private Page Protection: User not logged in
-  if (!isLoggedIn) {
-    return (
-      <main className="min-h-screen bg-[#FAF8F5] pt-32 pb-20 flex items-center justify-center">
-        <div className="max-w-md mx-auto text-center p-8 bg-white rounded-3xl border border-[#E8E2D5] shadow-xs">
-          <div className="p-3 bg-[#D9A441]/10 rounded-2xl w-fit mx-auto mb-4 text-[#B8860B]">
-            <LogIn className="w-8 h-8" />
-          </div>
-          <h2 className="text-2xl font-serif font-bold text-[#101010] mb-2">
-            Private Member Page
-          </h2>
-          <p className="text-sm text-gray-600 mb-6 font-sans leading-relaxed">
-            Please sign in to view your confirmed registrations and joined volunteer events.
-          </p>
-          <div className="flex flex-col gap-3">
-            <Link
-              href="/signin?redirect=/events/joined"
-              className="w-full py-3 bg-[#0f766e] hover:bg-[#0d9488] text-white text-sm font-semibold rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
-            >
-              <LogIn className="w-4 h-4" />
-              <span>Sign In to Access</span>
-            </Link>
-            <Link
-              href="/upcoming-events"
-              className="text-xs text-gray-500 hover:text-black transition-colors py-2"
-            >
-              &larr; Back to Public Upcoming Events
-            </Link>
-          </div>
-        </div>
-      </main>
-    );
+  // Direct redirect state if unauthenticated or session pending (no middle stage)
+  if (isPending || !isLoggedIn) {
+    return null;
   }
 
   return (

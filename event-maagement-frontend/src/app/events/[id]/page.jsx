@@ -99,9 +99,9 @@ export default function EventDetailsPage({ params }) {
 
   // 3. Handle Join Event action
   const handleJoinEvent = async () => {
-    // If not logged in -> Prompt login
+    // If not logged in -> Redirect immediately to login with no middle stage
     if (!isLoggedIn) {
-      setShowLoginPrompt(true);
+      window.location.replace(`/login?redirect=/events/${eventId}`);
       return;
     }
 

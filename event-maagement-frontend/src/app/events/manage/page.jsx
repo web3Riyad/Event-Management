@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   Calendar,
   MapPin,
@@ -35,6 +36,7 @@ const CATEGORIES = [
 ];
 
 export default function ManageEventsPage() {
+  const router = useRouter();
   const { data: session, isPending } = useSession();
 
   const [events, setEvents] = useState([]);
@@ -64,8 +66,16 @@ export default function ManageEventsPage() {
   const isLoggedIn = Boolean(session?.user);
   const user = session?.user;
 
+  // Direct redirect to login page if user is not authenticated (no middle stage)
+  useEffect(() => {
+    if (!isPending && !isLoggedIn) {
+      window.location.replace("/login?redirect=/events/manage");
+    }
+  }, [isPending, isLoggedIn]);
+
   // 1. Fetch events created by this logged-in user
   useEffect(() => {
+    if (!isLoggedIn || !user?.email) return;
     let isMounted = true;
 
     async function fetchCreatedEvents() {
@@ -267,51 +277,9 @@ export default function ManageEventsPage() {
     );
   });
 
-  // Loading Session State
-  if (isPending) {
-    return (
-      <main className="min-h-screen bg-[#FAF8F5] pt-32 pb-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-pulse space-y-6">
-          <div className="h-8 bg-gray-200 rounded w-64 mx-auto" />
-          <div className="h-4 bg-gray-200 rounded w-96 mx-auto" />
-          <div className="h-64 bg-gray-200 rounded-3xl mt-12" />
-        </div>
-      </main>
-    );
-  }
-
-  // Private Page Protection
-  if (!isLoggedIn) {
-    return (
-      <main className="min-h-screen bg-[#FAF8F5] pt-32 pb-20 flex items-center justify-center">
-        <div className="max-w-md mx-auto text-center p-8 bg-white rounded-3xl border border-[#E8E2D5] shadow-xs">
-          <div className="p-3 bg-[#D9A441]/10 rounded-2xl w-fit mx-auto mb-4 text-[#B8860B]">
-            <LogIn className="w-8 h-8" />
-          </div>
-          <h2 className="text-2xl font-serif font-bold text-[#101010] mb-2">
-            Private Organizer Portal
-          </h2>
-          <p className="text-sm text-gray-600 mb-6 font-sans leading-relaxed">
-            Please sign in to access your event management dashboard and update your created events.
-          </p>
-          <div className="flex flex-col gap-3">
-            <Link
-              href="/signin?redirect=/events/manage"
-              className="w-full py-3 bg-[#0f766e] hover:bg-[#0d9488] text-white text-sm font-semibold rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
-            >
-              <LogIn className="w-4 h-4" />
-              <span>Sign In to Continue</span>
-            </Link>
-            <Link
-              href="/upcoming-events"
-              className="text-xs text-gray-500 hover:text-black transition-colors py-2"
-            >
-              &larr; Back to Public Events
-            </Link>
-          </div>
-        </div>
-      </main>
-    );
+  // Direct redirect state if unauthenticated or session pending (no middle stage)
+  if (isPending || !isLoggedIn) {
+    return null;
   }
 
   return (

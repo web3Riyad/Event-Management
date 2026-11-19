@@ -51,6 +51,13 @@ export default function CreateEventPage() {
   const isLoggedIn = Boolean(session?.user);
   const user = session?.user;
 
+  // Direct redirect to login page if user is not authenticated (no middle stage)
+  useEffect(() => {
+    if (!isPending && !isLoggedIn) {
+      window.location.replace("/login?redirect=/events/create");
+    }
+  }, [isPending, isLoggedIn]);
+
   // Minimum date selectable is today
   const todayStr = new Date().toISOString().split("T")[0];
 
@@ -204,39 +211,9 @@ export default function CreateEventPage() {
     }
   };
 
-  // If user is not logged in, show helpful login banner
-  if (!isPending && !isLoggedIn) {
-    return (
-      <main className="min-h-screen bg-[#FAF8F5] pt-32 pb-20 flex items-center justify-center">
-        <div className="max-w-md mx-auto text-center p-8 bg-white rounded-3xl border border-[#E8E2D5] shadow-xs">
-          <div className="p-3 bg-[#D9A441]/10 rounded-2xl w-fit mx-auto mb-4 text-[#B8860B]">
-            <LogIn className="w-8 h-8" />
-          </div>
-          <h2 className="text-2xl font-serif font-bold text-[#101010] mb-2">
-            Sign In Required
-          </h2>
-          <p className="text-sm text-gray-600 mb-6 font-sans leading-relaxed">
-            Only authenticated organizers and community leaders can create and publish new social
-            welfare drives.
-          </p>
-          <div className="flex flex-col gap-3">
-            <Link
-              href="/signin?redirect=/events/create"
-              className="w-full py-3 bg-[#0f766e] hover:bg-[#0d9488] text-white text-sm font-semibold rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
-            >
-              <LogIn className="w-4 h-4" />
-              <span>Sign In to Continue</span>
-            </Link>
-            <Link
-              href="/upcoming-events"
-              className="text-xs text-gray-500 hover:text-black transition-colors py-2"
-            >
-              &larr; Back to Upcoming Events
-            </Link>
-          </div>
-        </div>
-      </main>
-    );
+  // Direct redirect state if unauthenticated or session pending (no middle stage)
+  if (isPending || !isLoggedIn) {
+    return null;
   }
 
   return (

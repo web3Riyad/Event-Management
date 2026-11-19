@@ -33,6 +33,17 @@ export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [toastMessage, setToastMessage] = useState("");
 
+  const getRedirectPath = () => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const dest = params.get("redirect");
+      if (dest && dest.startsWith("/")) {
+        return dest;
+      }
+    }
+    return "/";
+  };
+
   const onSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
@@ -50,12 +61,14 @@ export default function LoginPage() {
       return;
     }
 
+    const redirectPath = getRedirectPath();
+
     try {
       const { data: resdata, error } = await signIn.email({
         email,
         password,
         rememberMe: remember,
-        callbackURL: "/",
+        callbackURL: redirectPath,
       });
 
       if (error) {
@@ -67,7 +80,7 @@ export default function LoginPage() {
       setToastMessage("Login successful! Welcome back.");
 
       setTimeout(() => {
-        router.push("/");
+        router.push(redirectPath);
         router.refresh();
       }, 1000);
     } catch (err) {
@@ -82,9 +95,10 @@ export default function LoginPage() {
     try {
       setIsSocialLoading(true);
       setErrorMessage("");
+      const redirectPath = getRedirectPath();
       await signIn.social({
-        provider:"google",
-        callbackURL: "/",
+        provider: provider,
+        callbackURL: redirectPath,
       });
     } catch (err) {
       setErrorMessage(err?.message || `${provider} sign in failed. Please try email login.`);
