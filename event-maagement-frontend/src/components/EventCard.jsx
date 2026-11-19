@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { Calendar, MapPin, ArrowRight, CheckCircle2 } from "lucide-react";
+import Image from "next/image";
 
 export function formatEventDate(dateStr) {
   if (!dateStr) return "";
@@ -29,11 +30,12 @@ export default function EventCard({ event, isPast = false }) {
     return (
       <div className="bg-white/80 rounded-2xl border border-gray-200 shadow-xs hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col group opacity-90 hover:opacity-100">
         <div className="relative h-44 w-full overflow-hidden bg-gray-200">
-          <img
+          <Image
             src={event.thumbnailImageUrl || fallbackImage}
             alt={event.eventTitle || "Past Event"}
-            className="w-full h-full object-cover grayscale-[30%] group-hover:grayscale-0 transition-all duration-500"
-            loading="lazy"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover grayscale-[30%] group-hover:grayscale-0 transition-all duration-500"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
@@ -71,11 +73,12 @@ export default function EventCard({ event, isPast = false }) {
   return (
     <div className="group bg-white rounded-2xl border border-[#E8E2D5] shadow-xs hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col hover:-translate-y-1">
       <div className="relative h-56 w-full overflow-hidden bg-gray-100">
-        <img
+        <Image
           src={event.thumbnailImageUrl || fallbackImage}
           alt={event.eventTitle || "Event Thumbnail"}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-          loading="lazy"
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
 
