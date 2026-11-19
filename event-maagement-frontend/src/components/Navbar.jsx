@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
   Calendar,
   PlusCircle,
@@ -38,9 +38,11 @@ import {
 export default function Navbar() {
   const { data: session } = useSession();
   const router = useRouter();
+  const pathname = usePathname();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const dropdownRef = useRef(null);
 
   const isLoggedIn = Boolean(session?.user);
@@ -59,6 +61,16 @@ export default function Navbar() {
       .join("")
       .slice(0, 2)
       .toUpperCase() || "U";
+
+  // Scroll listener for adaptive header styling
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -82,8 +94,17 @@ export default function Navbar() {
     }
   };
 
+  const isHeroTransparent = pathname === "/" && !isScrolled;
+
   return (
-    <header className="sticky top-0 z-50 -mb-20 bg-transparent text-[#F5F1E8] border-b border-white/10 backdrop-blur-sm transition-all duration-300">
+    <header
+      className={cn(
+        "sticky top-0 z-50 -mb-20 transition-all duration-300",
+        isHeroTransparent
+          ? "bg-transparent text-[#F5F1E8] border-b border-white/10 backdrop-blur-sm"
+          : "bg-white/95 dark:bg-[#101010]/95 text-gray-900 dark:text-[#F5F1E8] border-b border-gray-200 dark:border-white/10 shadow-xs backdrop-blur-md"
+      )}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         
         {/* 1. App Logo and Name */}
@@ -99,10 +120,10 @@ export default function Navbar() {
             />
           </div>
           <div className="flex flex-col">
-            <span className="text-xl sm:text-2xl font-serif font-bold tracking-tight text-[#D9A441] group-hover:text-[#F5F1E8] transition-colors leading-none">
+            <span className="text-xl sm:text-2xl font-serif font-bold tracking-tight text-[#D9A441] group-hover:text-black dark:group-hover:text-[#F5F1E8] transition-colors leading-none">
               UNIQUE<span className="text-[#D9A441]">.</span>
             </span>
-            <span className="text-[10px] uppercase tracking-[0.22em] text-[#777777] font-sans font-medium mt-1">
+            <span className="text-[10px] uppercase tracking-[0.22em] text-[#777777] dark:text-[#888888] font-sans font-medium mt-1">
               Event Management
             </span>
           </div>
@@ -112,7 +133,12 @@ export default function Navbar() {
         <nav className="hidden md:flex items-center gap-8">
           <Link
             href="/upcoming-events"
-            className="flex items-center gap-2 text-sm font-medium tracking-wide text-[#F5F1E8]/90 hover:text-[#D9A441] transition-all duration-200 py-2 border-b-2 border-transparent hover:border-[#D9A441]"
+            className={cn(
+              "flex items-center gap-2 text-sm font-medium tracking-wide transition-all duration-200 py-2 border-b-2 border-transparent hover:border-[#D9A441]",
+              isHeroTransparent
+                ? "text-[#F5F1E8]/90 hover:text-[#D9A441]"
+                : "text-gray-700 dark:text-[#F5F1E8]/90 hover:text-[#D9A441] dark:hover:text-[#D9A441]"
+            )}
           >
             <Calendar className="w-4 h-4 text-[#D9A441]" />
             Upcoming Events
@@ -131,7 +157,10 @@ export default function Navbar() {
                 href="/login"
                 className={cn(
                   buttonVariants({ variant: "ghost" }),
-                  "text-[#F5F1E8] hover:text-[#D9A441] hover:bg-white/5 text-sm font-medium px-4 py-2 rounded-xl transition-all cursor-pointer"
+                  "text-sm font-medium px-4 py-2 rounded-xl transition-all cursor-pointer",
+                  isHeroTransparent
+                    ? "text-[#F5F1E8] hover:text-[#D9A441] hover:bg-white/5"
+                    : "text-gray-700 dark:text-[#F5F1E8] hover:text-[#D9A441] dark:hover:text-[#D9A441] hover:bg-gray-100 dark:hover:bg-white/5"
                 )}
               >
                 <LogIn className="w-4 h-4 mr-1.5" />
@@ -159,7 +188,12 @@ export default function Navbar() {
                   type="button"
                   onClick={() => setIsDropdownOpen((prev) => !prev)}
                   title={displayName}
-                  className="flex items-center gap-2 p-1 rounded-full bg-black/40 hover:bg-black/60 border border-[#D9A441]/50 hover:border-[#D9A441] transition-all focus:outline-none focus:ring-2 focus:ring-[#D9A441]/60 cursor-pointer"
+                  className={cn(
+                    "flex items-center gap-2 p-1 rounded-full border transition-all focus:outline-none focus:ring-2 focus:ring-[#D9A441]/60 cursor-pointer",
+                    isHeroTransparent
+                      ? "bg-black/40 hover:bg-black/60 border-[#D9A441]/50 hover:border-[#D9A441]"
+                      : "bg-gray-100 dark:bg-black/40 hover:bg-gray-200 dark:hover:bg-black/60 border-gray-300 dark:border-[#D9A441]/50 hover:border-[#D9A441]"
+                  )}
                   aria-label={displayName}
                   aria-expanded={isDropdownOpen}
                 >
@@ -183,16 +217,16 @@ export default function Navbar() {
                   </div>
                 )}
 
-                {/* Dropdown Menu (Exact items and styling from the provided image) */}
+                {/* Dropdown Menu */}
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-3 w-64 bg-white text-gray-800 rounded-2xl shadow-2xl border border-gray-100 py-2.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="absolute right-0 mt-3 w-64 bg-white dark:bg-[#181818] text-gray-800 dark:text-[#F5F1E8] rounded-2xl shadow-2xl border border-gray-100 dark:border-white/10 py-2.5 z-50 animate-in fade-in zoom-in-95 duration-150">
                     
                     {/* Header: User Name & Email */}
-                    <div className="px-4 py-2.5 border-b border-gray-100">
-                      <p className="text-sm font-bold text-gray-900 truncate">
+                    <div className="px-4 py-2.5 border-b border-gray-100 dark:border-white/10">
+                      <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
                         {displayName}
                       </p>
-                      <p className="text-xs text-gray-400 font-sans truncate mt-0.5">
+                      <p className="text-xs text-gray-400 dark:text-gray-400 font-sans truncate mt-0.5">
                         {email}
                       </p>
                     </div>
@@ -203,7 +237,7 @@ export default function Navbar() {
                       <Link
                         href="/profile"
                         onClick={() => setIsDropdownOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-[#D9A441] hover:bg-amber-50/60 transition-colors"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-[#D9A441] dark:hover:text-[#D9A441] hover:bg-amber-50/60 dark:hover:bg-white/5 transition-colors"
                       >
                         <User className="w-4 h-4 text-[#D9A441] shrink-0" />
                         <span>My Profile</span>
@@ -213,9 +247,9 @@ export default function Navbar() {
                       <Link
                         href="/events/create"
                         onClick={() => setIsDropdownOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-teal-700 hover:bg-teal-50/60 transition-colors"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-teal-700 dark:hover:text-teal-400 hover:bg-teal-50/60 dark:hover:bg-teal-950/30 transition-colors"
                       >
-                        <PlusCircle className="w-4 h-4 text-teal-600 shrink-0" />
+                        <PlusCircle className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
                         <span>Create Event</span>
                       </Link>
 
@@ -223,9 +257,9 @@ export default function Navbar() {
                       <Link
                         href="/events/manage"
                         onClick={() => setIsDropdownOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-purple-700 hover:bg-purple-50/60 transition-colors"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-purple-700 dark:hover:text-purple-400 hover:bg-purple-50/60 dark:hover:bg-purple-950/30 transition-colors"
                       >
-                        <Settings className="w-4 h-4 text-purple-600 shrink-0" />
+                        <Settings className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
                         <span>Manage Events</span>
                       </Link>
 
@@ -233,36 +267,36 @@ export default function Navbar() {
                       <Link
                         href="/events/joined"
                         onClick={() => setIsDropdownOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-emerald-700 hover:bg-emerald-50/60 transition-colors"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50/60 dark:hover:bg-emerald-950/30 transition-colors"
                       >
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                         <span>Joined Events</span>
                       </Link>
                     </div>
 
                     {/* Separator Line */}
-                    <div className="border-t border-gray-100 my-1" />
+                    <div className="border-t border-gray-100 dark:border-white/10 my-1" />
 
                     {/* 4. Logout (Red LogOut) */}
                     <button
                       type="button"
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-sm font-medium text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm font-medium text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
                     >
-                      <LogOut className="w-4 h-4 text-red-500 shrink-0" />
+                      <LogOut className="w-4 h-4 text-red-500 dark:text-red-400 shrink-0" />
                       <span>Logout</span>
                     </button>
                   </div>
                 )}
               </div>
 
-              {/* Dedicated Navbar Logout Button (Matching screenshot) */}
+              {/* Dedicated Navbar Logout Button */}
               <Button
                 variant="outline"
                 onClick={handleLogout}
-                className="border-gray-300/40 hover:border-red-400 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl text-sm font-medium px-4 py-2 transition-all cursor-pointer flex items-center gap-2"
+                className="border-gray-300/60 dark:border-gray-300/40 hover:border-red-400 text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl text-sm font-medium px-4 py-2 transition-all cursor-pointer flex items-center gap-2"
               >
-                <LogOut className="w-4 h-4 text-red-400" />
+                <LogOut className="w-4 h-4 text-red-500 dark:text-red-400" />
                 <span>Logout</span>
               </Button>
             </div>
@@ -289,7 +323,12 @@ export default function Navbar() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-[#F5F1E8] hover:text-[#D9A441] hover:bg-[#181818] p-2 rounded-lg"
+                  className={cn(
+                    "p-2 rounded-lg transition-colors",
+                    isHeroTransparent
+                      ? "text-[#F5F1E8] hover:text-[#D9A441] hover:bg-[#181818]"
+                      : "text-gray-800 dark:text-[#F5F1E8] hover:text-[#D9A441] hover:bg-gray-100 dark:hover:bg-[#181818]"
+                  )}
                 />
               }
             >
@@ -298,11 +337,11 @@ export default function Navbar() {
 
             <SheetContent
               side="right"
-              className="bg-[#141414] text-[#F5F1E8] border-l border-[#262626] p-6 w-80 max-w-full"
+              className="bg-white dark:bg-[#141414] text-gray-900 dark:text-[#F5F1E8] border-l border-gray-200 dark:border-[#262626] p-6 w-80 max-w-full"
             >
               <SheetHeader className="p-0 mb-6">
                 <SheetTitle className="text-left font-serif text-xl text-[#D9A441]">
-                  UNIQUE<span className="text-[#F5F1E8]">.</span>
+                  UNIQUE<span className="text-[#101010] dark:text-[#F5F1E8]">.</span>
                 </SheetTitle>
               </SheetHeader>
 
@@ -310,7 +349,7 @@ export default function Navbar() {
                 <Link
                   href="/upcoming-events"
                   onClick={() => setIsMobileSheetOpen(false)}
-                  className="flex items-center gap-3 text-sm font-medium text-[#F5F1E8] hover:text-[#D9A441] py-2 border-b border-[#222222]"
+                  className="flex items-center gap-3 text-sm font-medium text-gray-800 dark:text-[#F5F1E8] hover:text-[#D9A441] py-2 border-b border-gray-100 dark:border-[#222222]"
                 >
                   <Calendar className="w-4 h-4 text-[#D9A441]" />
                   Upcoming Events
@@ -318,7 +357,7 @@ export default function Navbar() {
 
                 {isLoggedIn ? (
                   <div className="space-y-4 pt-2">
-                    <div className="flex items-center gap-3 p-3 bg-[#181818] rounded-xl border border-[#2A2A2A]">
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#181818] rounded-xl border border-gray-200 dark:border-[#2A2A2A]">
                       <Avatar className="size-10 ring-2 ring-[#D9A441]">
                         <AvatarImage src={avatarUrl} alt={displayName} />
                         <AvatarFallback className="bg-[#101010] text-[#D9A441] font-semibold text-xs">
@@ -326,7 +365,7 @@ export default function Navbar() {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col truncate">
-                        <span className="text-sm font-serif font-medium text-white truncate">
+                        <span className="text-sm font-serif font-medium text-gray-900 dark:text-white truncate">
                           {displayName}
                         </span>
                         <span className="text-xs text-[#777777] font-sans truncate">
@@ -339,7 +378,7 @@ export default function Navbar() {
                       <Link
                         href="/profile"
                         onClick={() => setIsMobileSheetOpen(false)}
-                        className="flex items-center gap-3 text-sm text-[#F5F1E8] hover:text-[#D9A441] py-2 px-1"
+                        className="flex items-center gap-3 text-sm text-gray-700 dark:text-[#F5F1E8] hover:text-[#D9A441] py-2 px-1 rounded-lg"
                       >
                         <User className="w-4 h-4 text-[#D9A441]" />
                         My Profile
@@ -347,25 +386,25 @@ export default function Navbar() {
                       <Link
                         href="/events/create"
                         onClick={() => setIsMobileSheetOpen(false)}
-                        className="flex items-center gap-3 text-sm text-[#F5F1E8] hover:text-teal-400 py-2 px-1"
+                        className="flex items-center gap-3 text-sm text-gray-700 dark:text-[#F5F1E8] hover:text-teal-600 dark:hover:text-teal-400 py-2 px-1 rounded-lg"
                       >
-                        <PlusCircle className="w-4 h-4 text-teal-400" />
+                        <PlusCircle className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                         Create Event
                       </Link>
                       <Link
                         href="/events/manage"
                         onClick={() => setIsMobileSheetOpen(false)}
-                        className="flex items-center gap-3 text-sm text-[#F5F1E8] hover:text-purple-400 py-2 px-1"
+                        className="flex items-center gap-3 text-sm text-gray-700 dark:text-[#F5F1E8] hover:text-purple-600 dark:hover:text-purple-400 py-2 px-1 rounded-lg"
                       >
-                        <Settings className="w-4 h-4 text-purple-400" />
+                        <Settings className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                         Manage Events
                       </Link>
                       <Link
                         href="/events/joined"
                         onClick={() => setIsMobileSheetOpen(false)}
-                        className="flex items-center gap-3 text-sm text-[#F5F1E8] hover:text-emerald-400 py-2 px-1"
+                        className="flex items-center gap-3 text-sm text-gray-700 dark:text-[#F5F1E8] hover:text-emerald-600 dark:hover:text-emerald-400 py-2 px-1 rounded-lg"
                       >
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                         Joined Events
                       </Link>
                     </div>
@@ -376,9 +415,9 @@ export default function Navbar() {
                         handleLogout();
                         setIsMobileSheetOpen(false);
                       }}
-                      className="w-full mt-4 border-red-500/30 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl py-2.5 flex items-center justify-center gap-2"
+                      className="w-full mt-4 border-red-500/30 text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl py-2.5 flex items-center justify-center gap-2"
                     >
-                      <LogOut className="w-4 h-4 text-red-400" />
+                      <LogOut className="w-4 h-4 text-red-500 dark:text-red-400" />
                       Logout
                     </Button>
                   </div>
@@ -389,7 +428,7 @@ export default function Navbar() {
                       onClick={() => setIsMobileSheetOpen(false)}
                       className={cn(
                         buttonVariants({ variant: "outline" }),
-                        "w-full border-[#777777]/40 text-[#F5F1E8] hover:text-[#D9A441] hover:border-[#D9A441] py-2.5 rounded-xl cursor-pointer flex items-center justify-center"
+                        "w-full border-gray-300 dark:border-[#777777]/40 text-gray-800 dark:text-[#F5F1E8] hover:text-[#D9A441] hover:border-[#D9A441] py-2.5 rounded-xl cursor-pointer flex items-center justify-center"
                       )}
                     >
                       <LogIn className="w-4 h-4 mr-2" />

@@ -444,8 +444,8 @@ export default function ManageEventsPage() {
             )}
           </div>
 
-          <div className="text-xs text-[#777777] self-end sm:self-center">
-            Showing <strong className="text-[#101010]">{filteredEvents.length}</strong> created event{filteredEvents.length === 1 ? "" : "s"}
+          <div className="text-xs text-[#777777] dark:text-gray-400 self-end sm:self-center">
+            Showing <strong className="text-[#101010] dark:text-white">{filteredEvents.length}</strong> created event{filteredEvents.length === 1 ? "" : "s"}
           </div>
         </div>
 
@@ -453,18 +453,18 @@ export default function ManageEventsPage() {
         {loading ? (
           <ManageEventSkeleton count={3} />
         ) : error ? (
-          <div className="p-12 text-center bg-white rounded-3xl border border-red-200 max-w-xl mx-auto">
+          <div className="p-12 text-center bg-white dark:bg-[#181818] rounded-3xl border border-red-200 dark:border-red-900/50 max-w-xl mx-auto">
             <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
-            <p className="text-base font-semibold text-gray-900">{error}</p>
+            <p className="text-base font-semibold text-gray-900 dark:text-red-300">{error}</p>
           </div>
         ) : filteredEvents.length === 0 ? (
           /* Empty State */
-          <div className="p-16 text-center bg-white rounded-3xl border border-[#E8E2D5] max-w-xl mx-auto shadow-xs">
+          <div className="p-16 text-center bg-white dark:bg-[#181818] rounded-3xl border border-[#E8E2D5] dark:border-white/10 max-w-xl mx-auto shadow-xs">
             <Calendar className="w-14 h-14 text-purple-600 mx-auto mb-4" />
-            <h3 className="text-2xl font-serif font-bold text-[#101010] mb-2">
+            <h3 className="text-2xl font-serif font-bold text-[#101010] dark:text-[#F5F1E8] mb-2">
               No Created Events Found
             </h3>
-            <p className="text-sm text-[#666666] font-sans mb-8 leading-relaxed">
+            <p className="text-sm text-[#666666] dark:text-gray-400 font-sans mb-8 leading-relaxed">
               {searchQuery
                 ? `No events matched your search "${searchQuery}".`
                 : "You haven't created any community events yet. Organize a local cleanup, winter relief drive, or tree plantation to mobilize volunteers!"}
@@ -489,11 +489,11 @@ export default function ManageEventsPage() {
               return (
                 <div
                   key={event._id}
-                  className="bg-white rounded-2xl border border-[#E8E2D5] shadow-xs hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col justify-between"
+                  className="bg-white dark:bg-[#181818] rounded-2xl border border-[#E8E2D5] dark:border-white/10 shadow-xs hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col justify-between"
                 >
                   <div>
                     {/* Thumbnail Image */}
-                    <div className="relative h-48 w-full overflow-hidden bg-gray-100">
+                    <div className="relative h-48 w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
                       <Image
                         src={event.thumbnailImageUrl || fallbackImage}
                         alt={event.eventTitle || "Event Thumbnail"}
@@ -522,16 +522,16 @@ export default function ManageEventsPage() {
 
                     {/* Content */}
                     <div className="p-5">
-                      <h3 className="text-lg font-serif font-bold text-[#101010] mb-2 line-clamp-1">
+                      <h3 className="text-lg font-serif font-bold text-[#101010] dark:text-[#F5F1E8] mb-2 line-clamp-1">
                         {event.eventTitle}
                       </h3>
 
-                      <div className="flex items-center gap-1.5 text-xs text-[#777777] mb-3">
+                      <div className="flex items-center gap-1.5 text-xs text-[#777777] dark:text-gray-400 mb-3">
                         <MapPin className="w-3.5 h-3.5 text-[#D9A441] shrink-0" />
                         <span className="truncate">{event.location}</span>
                       </div>
 
-                      <p className="text-xs text-gray-600 font-sans line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-gray-600 dark:text-gray-300 font-sans line-clamp-2 leading-relaxed">
                         {event.eventDescription}
                       </p>
                     </div>
@@ -539,10 +539,10 @@ export default function ManageEventsPage() {
 
                   {/* Actions Bar */}
                   <div className="p-5 pt-0">
-                    <div className="pt-4 border-t border-gray-100 flex items-center justify-between gap-2">
+                    <div className="pt-4 border-t border-gray-100 dark:border-white/10 flex items-center justify-between gap-2">
                       <Link
                         href={`/events/${event._id}`}
-                        className="p-2 text-gray-600 hover:text-[#0f766e] hover:bg-gray-50 rounded-xl transition-colors cursor-pointer"
+                        className="p-2 text-gray-600 dark:text-gray-300 hover:text-[#0f766e] dark:hover:text-[#0f766e] hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl transition-colors cursor-pointer"
                         title="View Public Event Page"
                       >
                         <Eye className="w-4 h-4" />
@@ -553,7 +553,7 @@ export default function ManageEventsPage() {
                         <button
                           type="button"
                           onClick={() => handleOpenEditModal(event)}
-                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#FAF8F5] hover:bg-purple-50 text-purple-700 hover:text-purple-800 border border-purple-200 rounded-xl text-xs font-semibold transition-all cursor-pointer"
+                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#FAF8F5] dark:bg-purple-950/30 hover:bg-purple-50 dark:hover:bg-purple-900/40 text-purple-700 dark:text-purple-300 hover:text-purple-800 dark:hover:text-purple-200 border border-purple-200 dark:border-purple-800/40 rounded-xl text-xs font-semibold transition-all cursor-pointer"
                         >
                           <Pencil className="w-3.5 h-3.5" />
                           <span>Update</span>
@@ -563,7 +563,7 @@ export default function ManageEventsPage() {
                         <button
                           type="button"
                           onClick={() => setDeletingEvent(event)}
-                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 border border-red-200 rounded-xl text-xs font-semibold transition-all cursor-pointer"
+                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-300 hover:text-red-700 dark:hover:text-red-200 border border-red-200 dark:border-red-800/40 rounded-xl text-xs font-semibold transition-all cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                           <span>Delete</span>
@@ -585,7 +585,7 @@ export default function ManageEventsPage() {
           onClick={() => setEditingEvent(null)}
         >
           <div
-            className="bg-white dark:bg-[#181818] rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-gray-200 dark:border-white/10 my-8 text-[#101010] dark:text-[#F5F1E8]"
+            className="bg-white dark:bg-[#181818] rounded-3xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-5 sm:p-8 shadow-2xl border border-gray-200 dark:border-white/10 my-4 sm:my-8 text-[#101010] dark:text-[#F5F1E8]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-white/10 mb-6">

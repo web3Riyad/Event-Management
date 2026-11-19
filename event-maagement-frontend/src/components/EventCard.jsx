@@ -128,15 +128,15 @@ export default function EventCard({ event, isPast = false }) {
         </p>
 
         {/* 6. Card Footer with View Event Button */}
-        <div className="pt-4 border-t border-gray-100 dark:border-white/10 flex items-center justify-between">
+        <div className="pt-4 border-t border-gray-100 dark:border-white/10 flex items-center justify-between gap-2 flex-wrap">
           <span className="text-[11px] uppercase tracking-wider text-[#0f766e] dark:text-emerald-400 font-semibold flex items-center gap-1">
-            <Sparkles className="w-3 h-3" />
-            Open for Volunteers
+            <Sparkles className="w-3 h-3 shrink-0" />
+            <span>Open for Volunteers</span>
           </span>
 
           <Link
             href={`/events/${eventId}`}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#101010] dark:bg-[#D9A441] hover:bg-[#0f766e] dark:hover:bg-[#C59333] text-white dark:text-[#101010] text-xs font-semibold rounded-xl shadow-xs hover:shadow-md transition-all duration-300 group/btn cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 bg-[#101010] dark:bg-[#D9A441] hover:bg-[#0f766e] dark:hover:bg-[#C59333] text-white dark:text-[#101010] text-xs font-semibold rounded-xl shadow-xs hover:shadow-md transition-all duration-300 group/btn cursor-pointer ml-auto"
           >
             <span>View Event</span>
             <Eye className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />

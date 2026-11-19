@@ -262,7 +262,7 @@ export default function ProfilePage() {
             <Sparkles className="w-3.5 h-3.5" />
             <span>Community Member Account</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-serif font-bold text-[#101010] dark:text-[#F5F1E8] tracking-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-[#101010] dark:text-[#F5F1E8] tracking-tight">
             User Profile
           </h1>
           <p className="text-sm sm:text-base text-[#666666] dark:text-gray-400 font-sans mt-2">
@@ -574,11 +574,18 @@ export default function ProfilePage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-4 flex items-center justify-between gap-4">
+              <div className="pt-4 flex flex-col-reverse sm:flex-row items-center justify-between gap-4">
+                <Link
+                  href="/"
+                  className="text-xs text-[#777777] hover:text-[#101010] dark:hover:text-white font-medium hover:underline transition-colors py-2"
+                >
+                  Return to Home
+                </Link>
+
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="inline-flex items-center gap-2 bg-[#D9A441] hover:bg-[#C59333] text-[#101010] font-semibold text-sm px-7 py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer disabled:opacity-50"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#D9A441] hover:bg-[#C59333] text-[#101010] font-semibold text-sm px-7 py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer disabled:opacity-50"
                 >
                   {isSaving ? (
                     <>
@@ -592,13 +599,6 @@ export default function ProfilePage() {
                     </>
                   )}
                 </button>
-
-                <Link
-                  href="/"
-                  className="text-xs text-[#777777] hover:text-[#101010] dark:hover:text-white font-medium hover:underline transition-colors"
-                >
-                  Return to Home
-                </Link>
               </div>
             </form>
           </div>

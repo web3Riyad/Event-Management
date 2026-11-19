@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -549,10 +549,10 @@ export default function CreateEventPage() {
             </div>
 
             {/* Submit Button */}
-            <div className="pt-4 border-t border-gray-100 dark:border-white/10 flex items-center justify-between">
+            <div className="pt-4 border-t border-gray-100 dark:border-white/10 flex flex-col-reverse sm:flex-row items-center justify-between gap-4">
               <Link
                 href="/upcoming-events"
-                className="text-xs text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white font-semibold"
+                className="text-xs text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white font-semibold py-2"
               >
                 Cancel
               </Link>
@@ -560,7 +560,7 @@ export default function CreateEventPage() {
               <button
                 type="submit"
                 disabled={loading || success}
-                className="px-8 py-3.5 bg-[#0f766e] hover:bg-[#0d9488] text-white font-semibold text-sm rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-2 cursor-pointer disabled:opacity-60"
+                className="w-full sm:w-auto px-8 py-3.5 bg-[#0f766e] hover:bg-[#0d9488] text-white font-semibold text-sm rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
               >
                 {loading ? (
                   <>

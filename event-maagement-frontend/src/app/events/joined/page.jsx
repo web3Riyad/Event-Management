@@ -133,7 +133,7 @@ export default function JoinedEventsPage() {
             <span>My Volunteer Schedule</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-[#101010] dark:text-[#F5F1E8] tracking-tight mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-[#101010] dark:text-[#F5F1E8] tracking-tight mb-4">
             Your Joined Events
           </h1>
 
@@ -200,18 +200,18 @@ export default function JoinedEventsPage() {
             <EventCardSkeleton count={3} />
           </div>
         ) : error ? (
-          <div className="p-12 text-center bg-white rounded-3xl border border-red-200 max-w-xl mx-auto">
+          <div className="p-12 text-center bg-white dark:bg-[#181818] rounded-3xl border border-red-200 dark:border-red-900/50 max-w-xl mx-auto">
             <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
-            <p className="text-base font-semibold text-gray-900">{error}</p>
+            <p className="text-base font-semibold text-gray-900 dark:text-red-300">{error}</p>
           </div>
         ) : processedEvents.length === 0 ? (
           /* Empty State */
-          <div className="p-16 text-center bg-white rounded-3xl border border-[#E8E2D5] max-w-xl mx-auto shadow-xs">
+          <div className="p-16 text-center bg-white dark:bg-[#181818] rounded-3xl border border-[#E8E2D5] dark:border-white/10 max-w-xl mx-auto shadow-xs">
             <HeartHandshake className="w-14 h-14 text-[#0f766e] mx-auto mb-4" />
-            <h3 className="text-2xl font-serif font-bold text-[#101010] mb-2">
+            <h3 className="text-2xl font-serif font-bold text-[#101010] dark:text-[#F5F1E8] mb-2">
               No Joined Events Found
             </h3>
-            <p className="text-sm text-[#666666] font-sans mb-8 leading-relaxed">
+            <p className="text-sm text-[#666666] dark:text-gray-400 font-sans mb-8 leading-relaxed">
               {searchQuery
                 ? `No joined events matched your search "${searchQuery}".`
                 : "You haven't joined any community events yet. Find an upcoming cleanup, tree plantation, or relief drive in your area and join as a volunteer!"}
@@ -237,10 +237,10 @@ export default function JoinedEventsPage() {
               return (
                 <div
                   key={item._id || idx}
-                  className="group bg-white rounded-2xl border border-[#E8E2D5] shadow-xs hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col hover:-translate-y-1"
+                  className="group bg-white dark:bg-[#181818] rounded-2xl border border-[#E8E2D5] dark:border-white/10 shadow-xs hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col hover:-translate-y-1"
                 >
                   {/* Thumbnail Banner */}
-                  <div className="relative h-56 w-full overflow-hidden bg-gray-100">
+                  <div className="relative h-56 w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
                     <Image
                       src={item.thumbnailImageUrl || fallbackImage}
                       alt={item.eventTitle || "Joined Event"}
@@ -271,29 +271,29 @@ export default function JoinedEventsPage() {
 
                   {/* Card Content */}
                   <div className="p-6 flex flex-col flex-1">
-                    <h3 className="text-xl font-serif font-bold text-[#101010] mb-2.5 group-hover:text-[#0f766e] transition-colors line-clamp-1">
+                    <h3 className="text-xl font-serif font-bold text-[#101010] dark:text-[#F5F1E8] mb-2.5 group-hover:text-[#0f766e] dark:group-hover:text-[#D9A441] transition-colors line-clamp-1">
                       {item.eventTitle}
                     </h3>
 
-                    <div className="flex items-center gap-1.5 text-xs text-[#777777] mb-3">
+                    <div className="flex items-center gap-1.5 text-xs text-[#777777] dark:text-gray-400 mb-3">
                       <MapPin className="w-3.5 h-3.5 text-[#D9A441] shrink-0" />
                       <span className="truncate">{item.location}</span>
                     </div>
 
-                    <p className="text-sm text-gray-600 font-sans line-clamp-2 mb-6 flex-1 leading-relaxed">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 font-sans line-clamp-2 mb-6 flex-1 leading-relaxed">
                       {item.eventDescription}
                     </p>
 
                     {/* Card Footer */}
-                    <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
-                      <span className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                    <div className="pt-4 border-t border-gray-100 dark:border-white/10 flex items-center justify-between">
+                      <span className="text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                         You&apos;re a Volunteer
                       </span>
 
                       <Link
                         href={`/events/${targetId}`}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-[#101010] hover:bg-[#0f766e] text-white text-xs font-semibold rounded-xl shadow-xs hover:shadow-md transition-all duration-300 group/btn cursor-pointer"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-[#101010] dark:bg-[#D9A441] hover:bg-[#0f766e] dark:hover:bg-[#C59333] text-white dark:text-[#101010] text-xs font-semibold rounded-xl shadow-xs hover:shadow-md transition-all duration-300 group/btn cursor-pointer"
                       >
                         <span>View Event</span>
                         <Eye className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />

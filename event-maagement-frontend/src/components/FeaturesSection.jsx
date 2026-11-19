@@ -66,7 +66,7 @@ export default function FeaturesSection() {
         </div>
 
         {/* Feature Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {FEATURES.map((feature, idx) => {
             const IconComponent = feature.icon;
             return (

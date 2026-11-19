@@ -132,7 +132,7 @@ export default function LoginPage() {
         </div>
       )}
 
-      <div className="w-full max-w-md bg-[#101010] text-[#F5F1E8] rounded-3xl border border-[#262626] shadow-2xl p-8 sm:p-10 relative overflow-hidden">
+      <div className="w-full max-w-md bg-[#101010] text-[#F5F1E8] rounded-3xl border border-[#262626] shadow-2xl p-6 sm:p-10 relative overflow-hidden">
         {/* Subtle decorative gold glow */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-[#D9A441]/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-[#D9A441]/5 rounded-full blur-3xl pointer-events-none" />

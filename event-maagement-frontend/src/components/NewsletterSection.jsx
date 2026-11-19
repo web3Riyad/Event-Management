@@ -67,7 +67,7 @@ export default function NewsletterSection() {
             </form>
           )}
 
-          <div className="flex items-center justify-center gap-4 mt-6 text-xs text-[#777777]">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mt-6 text-xs text-[#777777]">
             <span className="flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5 text-[#0f766e]" />
               Zero spam, unsubscribe anytime

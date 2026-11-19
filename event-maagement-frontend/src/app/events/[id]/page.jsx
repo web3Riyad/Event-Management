@@ -199,7 +199,7 @@ export default function EventDetailsPage({ params }) {
         {/* Hero Card */}
         <div className="bg-white dark:bg-[#181818] rounded-3xl border border-[#E8E2D5] dark:border-white/10 overflow-hidden shadow-xs">
           {/* Main Photo Banner with fill & sizes */}
-          <div className="relative h-72 sm:h-96 md:h-[420px] w-full overflow-hidden bg-gray-900">
+          <div className="relative h-64 sm:h-80 md:h-[420px] w-full overflow-hidden bg-gray-900">
             <Image
               src={event.thumbnailImageUrl || fallbackImage}
               alt={event.eventTitle || "Event Photo"}
@@ -212,35 +212,35 @@ export default function EventDetailsPage({ params }) {
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
 
             {/* Event Category Tag */}
-            <span className="absolute top-6 left-6 bg-[#0f766e] text-white text-xs font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-full shadow-lg">
+            <span className="absolute top-4 sm:top-6 left-4 sm:left-6 bg-[#0f766e] text-white text-[11px] sm:text-xs font-bold uppercase tracking-wider px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full shadow-lg">
               {event.eventType}
             </span>
 
             {/* Open For Volunteers Pill */}
-            <span className="absolute top-6 right-6 bg-black/60 backdrop-blur-md text-white border border-white/20 text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5">
+            <span className="absolute top-4 sm:top-6 right-4 sm:right-6 bg-black/60 backdrop-blur-md text-white border border-white/20 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-[#D9A441]" />
-              Open for Volunteers
+              <span>Open for Volunteers</span>
             </span>
 
             {/* Overlay Title & Meta */}
-            <div className="absolute bottom-6 left-6 right-6 text-white">
-              <h1 className="text-2xl sm:text-4xl md:text-5xl font-serif font-bold text-white tracking-tight leading-tight mb-3 drop-shadow-md">
+            <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 right-4 sm:right-6 text-white">
+              <h1 className="text-xl sm:text-3xl md:text-5xl font-serif font-bold text-white tracking-tight leading-tight mb-2 sm:mb-3 drop-shadow-md line-clamp-2">
                 {event.eventTitle}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-gray-200">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-200">
                 <span className="flex items-center gap-1.5 font-medium">
-                  <Calendar className="w-4 h-4 text-[#D9A441]" />
+                  <Calendar className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-[#D9A441]" />
                   {formattedDate}
                 </span>
                 <span>•</span>
                 <span className="flex items-center gap-1.5 font-medium">
-                  <MapPin className="w-4 h-4 text-[#D9A441]" />
-                  {event.location}
+                  <MapPin className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-[#D9A441]" />
+                  <span className="truncate max-w-[200px] sm:max-w-none">{event.location}</span>
                 </span>
                 <span>•</span>
                 <span className="flex items-center gap-1.5 font-medium">
-                  <Users className="w-4 h-4 text-[#D9A441]" />
+                  <Users className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-[#D9A441]" />
                   {joinedCount} Registered Volunteer{joinedCount === 1 ? "" : "s"}
                 </span>
               </div>
@@ -248,9 +248,9 @@ export default function EventDetailsPage({ params }) {
           </div>
 
           {/* Details Content & Action Row */}
-          <div className="p-6 sm:p-10">
+          <div className="p-5 sm:p-8 md:p-10">
             {/* Quick Metrics Bar */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-5 bg-[#FAF8F5] rounded-2xl border border-gray-200/80 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 p-4 sm:p-5 bg-[#FAF8F5] dark:bg-[#202020] rounded-2xl border border-gray-200/80 dark:border-white/10 mb-8">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-[#0f766e]/10 text-[#0f766e]">
                   <Calendar className="w-5 h-5" />
@@ -259,7 +259,7 @@ export default function EventDetailsPage({ params }) {
                   <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">
                     Scheduled Date
                   </span>
-                  <p className="text-sm font-semibold text-[#101010]">{formattedDate}</p>
+                  <p className="text-sm font-semibold text-[#101010] dark:text-[#F5F1E8]">{formattedDate}</p>
                 </div>
               </div>
 
@@ -271,7 +271,7 @@ export default function EventDetailsPage({ params }) {
                   <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">
                     Venue / Area
                   </span>
-                  <p className="text-sm font-semibold text-[#101010] truncate">
+                  <p className="text-sm font-semibold text-[#101010] dark:text-[#F5F1E8] truncate">
                     {event.location}
                   </p>
                 </div>
@@ -285,7 +285,7 @@ export default function EventDetailsPage({ params }) {
                   <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">
                     Initiative Type
                   </span>
-                  <p className="text-sm font-semibold text-[#101010]">{event.eventType}</p>
+                  <p className="text-sm font-semibold text-[#101010] dark:text-[#F5F1E8]">{event.eventType}</p>
                 </div>
               </div>
             </div>
@@ -316,29 +316,29 @@ export default function EventDetailsPage({ params }) {
 
               {/* Success / Error Banners */}
               {joinSuccessMessage && (
-                <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-3 text-emerald-800 text-sm font-medium">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-2xl flex items-center gap-3 text-emerald-800 dark:text-emerald-300 text-sm font-medium">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span>{joinSuccessMessage}</span>
                 </div>
               )}
 
               {joinErrorMessage && (
-                <div className="p-4 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-3 text-red-800 text-sm font-medium">
-                  <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+                <div className="p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-2xl flex items-center gap-3 text-red-800 dark:text-red-300 text-sm font-medium">
+                  <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0" />
                   <span>{joinErrorMessage}</span>
                 </div>
               )}
 
               {/* Login Prompt Box if user clicked while logged out */}
               {showLoginPrompt && !isLoggedIn && (
-                <div className="p-6 bg-[#D9A441]/10 border border-[#D9A441]/30 rounded-2xl">
+                <div className="p-6 bg-[#D9A441]/10 border border-[#D9A441]/30 rounded-2xl text-foreground">
                   <div className="flex items-start gap-3">
-                    <LogIn className="w-5 h-5 text-[#B8860B] mt-0.5 shrink-0" />
+                    <LogIn className="w-5 h-5 text-[#B8860B] dark:text-[#D9A441] mt-0.5 shrink-0" />
                     <div className="flex-1">
-                      <h4 className="text-sm font-bold text-[#101010]">
+                      <h4 className="text-sm font-bold text-[#101010] dark:text-[#F5F1E8]">
                         Authentication Required to Join
                       </h4>
-                      <p className="text-xs text-gray-600 mt-1 mb-4 font-sans">
+                      <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 mb-4 font-sans">
                         You can view all event details freely. To register your participation as a
                         volunteer, please sign in or create an account.
                       </p>
@@ -351,14 +351,14 @@ export default function EventDetailsPage({ params }) {
                         </Link>
                         <Link
                           href="/signup"
-                          className="px-5 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs font-semibold rounded-xl transition-all"
+                          className="px-5 py-2 bg-white dark:bg-[#181818] border border-gray-300 dark:border-white/20 hover:bg-gray-50 dark:hover:bg-white/5 text-gray-700 dark:text-[#F5F1E8] text-xs font-semibold rounded-xl transition-all"
                         >
                           Create Account
                         </Link>
                         <button
                           type="button"
                           onClick={() => setShowLoginPrompt(false)}
-                          className="text-xs text-gray-500 hover:text-black ml-auto"
+                          className="text-xs text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white ml-auto cursor-pointer"
                         >
                           Dismiss
                         </button>
@@ -369,10 +369,10 @@ export default function EventDetailsPage({ params }) {
               )}
 
               {/* Action Buttons Row */}
-              <div className="pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="text-xs text-gray-500">
+              <div className="pt-6 border-t border-gray-100 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="text-xs text-gray-500 dark:text-gray-400">
                   {hasJoined ? (
-                    <span className="flex items-center gap-1.5 text-emerald-700 font-semibold text-sm">
+                    <span className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 font-semibold text-sm">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                       You are confirmed as a volunteer
                     </span>

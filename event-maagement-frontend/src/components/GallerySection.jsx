@@ -160,10 +160,10 @@ export default function GallerySection() {
             onClick={() => setSelectedPhoto(null)}
           >
             <div
-              className="bg-white dark:bg-[#181818] rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl border border-gray-200 dark:border-white/10 text-[#101010] dark:text-[#F5F1E8]"
+              className="bg-white dark:bg-[#181818] rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-200 dark:border-white/10 text-[#101010] dark:text-[#F5F1E8]"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="relative h-80 sm:h-96 w-full">
+              <div className="relative h-64 sm:h-80 md:h-96 w-full">
                 <Image
                   src={selectedPhoto.imageUrl}
                   alt={selectedPhoto.title}

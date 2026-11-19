@@ -17,9 +17,9 @@ import {
 export default function Footer() {
   return (
     <footer className="bg-[#0c0c0c] text-[#F5F1E8] border-t border-[#222222] pt-16 pb-12 mt-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
         {/* Brand & Mission Statement */}
-        <div className="md:col-span-2 space-y-4">
+        <div className="sm:col-span-2 space-y-4">
           <Link href="/" className="inline-flex items-center gap-3">
             <div className="relative w-10 h-10 rounded-full overflow-hidden p-1 bg-[#181818] border border-[#D9A441]/40 shadow-md">
               <Image
@@ -114,9 +114,9 @@ export default function Footer() {
       </div>
 
       {/* Copyright Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 border-t border-[#222222] flex flex-col sm:flex-row items-center justify-between text-xs text-[#777777] gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 border-t border-[#222222] flex flex-col sm:flex-row items-center justify-between text-xs text-[#777777] gap-4 text-center sm:text-left">
         <p>© 2026 UNIQUE Event Management. All rights reserved.</p>
-        <div className="flex gap-6">
+        <div className="flex flex-wrap gap-x-6 gap-y-2 justify-center sm:justify-end">
           <Link href="/upcoming-events" className="hover:text-[#F5F1E8] transition-colors">
             Upcoming Drives
           </Link>

@@ -75,7 +75,7 @@ export default function UpcomingEventsPage() {
             <span>Public Schedule</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-[#101010] dark:text-[#F5F1E8] tracking-tight mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-[#101010] dark:text-[#F5F1E8] tracking-tight mb-4">
             All Upcoming Community Events
           </h1>
 
@@ -126,7 +126,7 @@ export default function UpcomingEventsPage() {
         </div>
 
         {/* Status Counter */}
-        <div className="flex items-center justify-between mt-8 pt-4 border-t border-[#E8E2D5] dark:border-white/10 text-xs text-[#777777] dark:text-gray-400">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 mt-8 pt-4 border-t border-[#E8E2D5] dark:border-white/10 text-xs text-[#777777] dark:text-gray-400 text-center sm:text-left">
           <span>
             Showing <strong className="text-[#101010] dark:text-white">{filteredEvents.length}</strong> upcoming drives
             {selectedCategory !== "All" && ` under "${selectedCategory}"`}
@@ -153,12 +153,12 @@ export default function UpcomingEventsPage() {
             <EventCardSkeleton count={6} />
           </div>
         ) : filteredEvents.length === 0 ? (
-          <div className="p-16 text-center bg-white rounded-3xl border border-[#E8E2D5] max-w-xl mx-auto shadow-xs">
+          <div className="p-16 text-center bg-white dark:bg-[#181818] rounded-3xl border border-[#E8E2D5] dark:border-white/10 max-w-xl mx-auto shadow-xs">
             <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-2xl font-serif font-bold text-[#101010] mb-2">
+            <h3 className="text-2xl font-serif font-bold text-[#101010] dark:text-[#F5F1E8] mb-2">
               No Upcoming Events Found
             </h3>
-            <p className="text-sm text-[#666666] font-sans mb-6">
+            <p className="text-sm text-[#666666] dark:text-gray-400 font-sans mb-6">
               {searchQuery
                 ? `No upcoming events matched "${searchQuery}". Try adjusting your keywords or clearing the search.`
                 : `There are currently no upcoming events under "${selectedCategory}". Check back soon or host your own drive.`}
@@ -171,7 +171,7 @@ export default function UpcomingEventsPage() {
                     setSelectedCategory("All");
                     setSearchQuery("");
                   }}
-                  className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-semibold rounded-xl transition-all cursor-pointer"
+                  className="px-5 py-2.5 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-gray-800 dark:text-white text-xs font-semibold rounded-xl transition-all cursor-pointer"
                 >
                   View All Categories
                 </button>

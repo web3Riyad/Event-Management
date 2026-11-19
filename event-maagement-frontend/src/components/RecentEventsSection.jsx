@@ -70,12 +70,12 @@ export default function RecentEventsSection() {
           </div>
         ) : events.length === 0 ? (
           /* Empty State */
-          <div className="p-16 text-center bg-[#FAF8F5] rounded-3xl border border-[#E8E2D5] max-w-xl mx-auto">
+          <div className="p-16 text-center bg-[#FAF8F5] dark:bg-[#181818] rounded-3xl border border-[#E8E2D5] dark:border-white/10 max-w-xl mx-auto">
             <Calendar className="w-12 h-12 text-[#D9A441] mx-auto mb-4" />
-            <h3 className="text-2xl font-serif font-bold text-[#101010] mb-2">
+            <h3 className="text-2xl font-serif font-bold text-[#101010] dark:text-[#F5F1E8] mb-2">
               No Upcoming Drives Yet
             </h3>
-            <p className="text-sm text-[#666666] font-sans mb-6">
+            <p className="text-sm text-[#666666] dark:text-gray-400 font-sans mb-6">
               Be the first community organizer to publish an upcoming social service drive.
             </p>
             <Link
@@ -99,7 +99,7 @@ export default function RecentEventsSection() {
             <div className="mt-14 text-center">
               <Link
                 href="/upcoming-events"
-                className="inline-flex items-center gap-3 px-8 py-3.5 rounded-full border-2 border-[#101010] hover:border-[#0f766e] text-[#101010] hover:text-[#0f766e] hover:bg-[#0f766e]/5 font-semibold text-sm transition-all duration-300 group cursor-pointer"
+                className="inline-flex items-center gap-3 px-8 py-3.5 rounded-full border-2 border-[#101010] dark:border-white/20 hover:border-[#0f766e] dark:hover:border-[#D9A441] text-[#101010] dark:text-[#F5F1E8] hover:text-[#0f766e] dark:hover:text-[#D9A441] hover:bg-[#0f766e]/5 dark:hover:bg-[#D9A441]/10 font-semibold text-sm transition-all duration-300 group cursor-pointer"
               >
                 <span>Browse All Upcoming Community Initiatives</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
