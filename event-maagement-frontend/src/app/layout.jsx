@@ -1,8 +1,13 @@
+import { setServers } from "node:dns/promises";
+
+setServers(["1.1.1.1", "8.8.8.8"]);
+
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export const metadata = {
-  title: "ÉLITE | Luxury Event Management",
+  title: "UNIQUE | Luxury Event Management",
   description: "Exquisite, elegant and professional event management services.",
 };
 
@@ -14,7 +19,7 @@ export default function RootLayout({ children }) {
         <main className="flex-1 flex flex-col">
           {children}
         </main>
-        
+        <Footer></Footer>
       </body>
     </html>
   );

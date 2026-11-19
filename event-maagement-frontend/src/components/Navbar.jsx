@@ -51,7 +51,7 @@ export default function Navbar() {
   // Mock user details
   const user = {
     displayName: "Alexander Wright",
-    email: "alexander.wright@elite.com",
+    email: "alexander.wright@UNIQUE.com",
     role: "VIP Host",
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
     initials: "AW",
@@ -66,7 +66,7 @@ export default function Navbar() {
           <div className="relative w-11 h-11 rounded-full overflow-hidden p-1 bg-[#181818] border border-[#D9A441]/40 group-hover:border-[#D9A441] transition-all duration-300 shadow-md">
             <Image
               src="/logo.png"
-              alt="Elite Events Logo"
+              alt="UNIQUE Events Logo"
               width={44}
               height={44}
               className="object-contain w-full h-full group-hover:scale-105 transition-transform duration-300"
@@ -74,8 +74,8 @@ export default function Navbar() {
             />
           </div>
           <div className="flex flex-col">
-            <span className="text-xl sm:text-2xl font-serif font-bold tracking-tight text-white group-hover:text-[#D9A441] transition-colors leading-none">
-              ÉLITE<span className="text-[#D9A441]">.</span>
+            <span className="text-xl sm:text-2xl font-serif font-bold tracking-tight text-[#D9A441] group-hover:text-[#F5F1E8] transition-colors leading-none">
+              UNIQUE<span className="text-[#D9A441]">.</span>
             </span>
             <span className="text-[10px] uppercase tracking-[0.22em] text-[#777777] font-sans font-medium mt-1">
               Event Management
