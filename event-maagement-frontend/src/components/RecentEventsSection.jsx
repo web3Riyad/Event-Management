@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Clock, ArrowRight, Calendar, Sparkles } from "lucide-react";
 import EventCard from "@/components/EventCard";
+import EventCardSkeleton from "@/components/skeletons/EventCardSkeleton";
 
 export default function RecentEventsSection() {
   const [events, setEvents] = useState([]);
@@ -62,20 +63,10 @@ export default function RecentEventsSection() {
           </Link>
         </div>
 
-        {/* Loading State */}
+        {/* Loading State with Skeleton */}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3, 4, 5, 6].map((n) => (
-              <div
-                key={n}
-                className="bg-[#FAF8F5] rounded-2xl border border-gray-100 p-6 space-y-4 animate-pulse"
-              >
-                <div className="h-48 bg-gray-200 rounded-xl w-full" />
-                <div className="h-5 bg-gray-200 rounded w-3/4" />
-                <div className="h-4 bg-gray-100 rounded w-1/2" />
-                <div className="h-10 bg-gray-100 rounded w-full" />
-              </div>
-            ))}
+            <EventCardSkeleton count={6} />
           </div>
         ) : events.length === 0 ? (
           /* Empty State */

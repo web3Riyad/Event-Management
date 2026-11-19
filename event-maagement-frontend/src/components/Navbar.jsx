@@ -15,6 +15,7 @@ import {
   ChevronDown,
   Menu,
   Sparkles,
+  User,
 } from "lucide-react";
 
 import { cn } from "cn";
@@ -198,6 +199,16 @@ export default function Navbar() {
 
                     {/* Navigation Items */}
                     <div className="py-1.5 space-y-0.5">
+                      {/* 0. My Profile (Gold User) */}
+                      <Link
+                        href="/profile"
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-[#D9A441] hover:bg-amber-50/60 transition-colors"
+                      >
+                        <User className="w-4 h-4 text-[#D9A441] shrink-0" />
+                        <span>My Profile</span>
+                      </Link>
+
                       {/* 1. Create Event (Teal PlusCircle) */}
                       <Link
                         href="/events/create"
@@ -325,6 +336,14 @@ export default function Navbar() {
                     </div>
 
                     <div className="space-y-2">
+                      <Link
+                        href="/profile"
+                        onClick={() => setIsMobileSheetOpen(false)}
+                        className="flex items-center gap-3 text-sm text-[#F5F1E8] hover:text-[#D9A441] py-2 px-1"
+                      >
+                        <User className="w-4 h-4 text-[#D9A441]" />
+                        My Profile
+                      </Link>
                       <Link
                         href="/events/create"
                         onClick={() => setIsMobileSheetOpen(false)}

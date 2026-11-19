@@ -25,6 +25,7 @@ import {
 import { useSession } from "@/lib/auth-client";
 import { getAuthHeaders } from "@/lib/jwt-client";
 import { formatEventDate } from "@/components/EventCard";
+import ManageEventSkeleton from "@/components/skeletons/ManageEventSkeleton";
 
 const CATEGORIES = [
   "Donation",
@@ -448,21 +449,9 @@ export default function ManageEventsPage() {
           </div>
         </div>
 
-        {/* Events Content */}
+        {/* Events Content with Skeleton */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3].map((n) => (
-              <div
-                key={n}
-                className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4 animate-pulse"
-              >
-                <div className="h-44 bg-gray-200 rounded-xl w-full" />
-                <div className="h-5 bg-gray-200 rounded w-3/4" />
-                <div className="h-4 bg-gray-100 rounded w-1/2" />
-                <div className="h-10 bg-gray-100 rounded w-full" />
-              </div>
-            ))}
-          </div>
+          <ManageEventSkeleton count={3} />
         ) : error ? (
           <div className="p-12 text-center bg-white rounded-3xl border border-red-200 max-w-xl mx-auto">
             <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />

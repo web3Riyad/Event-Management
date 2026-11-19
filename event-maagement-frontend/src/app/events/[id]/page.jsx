@@ -22,6 +22,7 @@ import {
 import { useSession } from "@/lib/auth-client";
 import { getAuthHeaders } from "@/lib/jwt-client";
 import { formatEventDate } from "@/components/EventCard";
+import EventDetailsSkeleton from "@/components/skeletons/EventDetailsSkeleton";
 
 export default function EventDetailsPage({ params }) {
   const unwrappedParams = use(params);
@@ -150,18 +151,9 @@ export default function EventDetailsPage({ params }) {
   const fallbackImage =
     "https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?w=1200";
 
-  // Loading State
+  // Loading State with Skeleton
   if (loading) {
-    return (
-      <main className="min-h-screen bg-[#FAF8F5] pt-28 pb-20">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 animate-pulse space-y-6">
-          <div className="h-6 bg-gray-200 rounded w-32" />
-          <div className="h-96 bg-gray-200 rounded-3xl w-full" />
-          <div className="h-10 bg-gray-200 rounded w-3/4" />
-          <div className="h-32 bg-gray-200 rounded-2xl w-full" />
-        </div>
-      </main>
-    );
+    return <EventDetailsSkeleton />;
   }
 
   // Error State

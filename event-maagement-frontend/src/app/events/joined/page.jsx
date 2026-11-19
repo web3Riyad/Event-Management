@@ -21,6 +21,7 @@ import {
 import { useSession } from "@/lib/auth-client";
 import { getAuthHeaders } from "@/lib/jwt-client";
 import { formatEventDate } from "@/components/EventCard";
+import EventCardSkeleton from "@/components/skeletons/EventCardSkeleton";
 
 export default function JoinedEventsPage() {
   const router = useRouter();
@@ -85,7 +86,7 @@ export default function JoinedEventsPage() {
     return () => {
       isMounted = false;
     };
-  }, [isPending, isLoggedIn, user?.email]);
+  }, [isPending, isLoggedIn, user]);
 
   // 2. Sort by eventDate and search filter
   const processedEvents = useMemo(() => {
@@ -196,17 +197,7 @@ export default function JoinedEventsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3].map((n) => (
-              <div
-                key={n}
-                className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4 animate-pulse"
-              >
-                <div className="h-48 bg-gray-200 rounded-xl w-full" />
-                <div className="h-5 bg-gray-200 rounded w-3/4" />
-                <div className="h-4 bg-gray-100 rounded w-1/2" />
-                <div className="h-10 bg-gray-100 rounded w-full" />
-              </div>
-            ))}
+            <EventCardSkeleton count={3} />
           </div>
         ) : error ? (
           <div className="p-12 text-center bg-white rounded-3xl border border-red-200 max-w-xl mx-auto">

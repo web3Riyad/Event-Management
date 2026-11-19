@@ -12,6 +12,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import EventCard from "@/components/EventCard";
+import EventCardSkeleton from "@/components/skeletons/EventCardSkeleton";
 import CategoryFilter, { DEFAULT_CATEGORIES } from "@/components/CategoryFilter";
 
 export default function UpcomingEventsPage() {
@@ -149,17 +150,7 @@ export default function UpcomingEventsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3, 4, 5, 6].map((n) => (
-              <div
-                key={n}
-                className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4 animate-pulse shadow-xs"
-              >
-                <div className="h-48 bg-gray-200 rounded-xl w-full" />
-                <div className="h-5 bg-gray-200 rounded w-3/4" />
-                <div className="h-4 bg-gray-100 rounded w-1/2" />
-                <div className="h-10 bg-gray-100 rounded w-full" />
-              </div>
-            ))}
+            <EventCardSkeleton count={6} />
           </div>
         ) : filteredEvents.length === 0 ? (
           <div className="p-16 text-center bg-white rounded-3xl border border-[#E8E2D5] max-w-xl mx-auto shadow-xs">

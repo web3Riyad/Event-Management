@@ -432,6 +432,89 @@ app.delete('/events/:id', requireJwtAuth, async (req, res) => {
   }
 });
 
+// GET user profile and activity stats (Protected by JWT)
+app.get('/user/profile', requireJwtAuth, async (req, res) => {
+  try {
+    const userEmail = req.user?.email || req.query.email;
+    if (!userEmail) {
+      return res.status(400).json({ error: 'User email is required' });
+    }
+
+    const userCollection = db.collection('user');
+    const dbUser = await userCollection.findOne({
+      email: { $regex: new RegExp(`^${userEmail}$`, 'i') },
+    });
+
+    const [createdCount, joinedCount] = await Promise.all([
+      eventsCollection.countDocuments({
+        creatorEmail: { $regex: new RegExp(`^${userEmail}$`, 'i') },
+      }),
+      joinedEventsCollection.countDocuments({
+        userEmail: { $regex: new RegExp(`^${userEmail}$`, 'i') },
+      }),
+    ]);
+
+    res.json({
+      name: dbUser?.name || req.user?.name || 'Community Volunteer',
+      email: dbUser?.email || userEmail,
+      image: dbUser?.image || '',
+      createdAt: dbUser?.createdAt || null,
+      stats: {
+        createdEventsCount: createdCount,
+        joinedEventsCount: joinedCount,
+      },
+    });
+  } catch (err) {
+    console.error('Error fetching user profile:', err);
+    res.status(500).json({ error: 'Failed to fetch user profile' });
+  }
+});
+
+// PUT update user profile (Name and Profile Picture - Protected by JWT)
+app.put('/user/profile', requireJwtAuth, async (req, res) => {
+  try {
+    const userEmail = req.user?.email;
+    if (!userEmail) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const { name, image } = req.body;
+    if (!name || typeof name !== 'string' || name.trim().length < 2) {
+      return res.status(400).json({ error: 'Name must be at least 2 characters long' });
+    }
+
+    const trimmedName = name.trim();
+    const finalImage = typeof image === 'string' ? image.trim() : '';
+    const userCollection = db.collection('user');
+
+    await userCollection.updateOne(
+      { email: { $regex: new RegExp(`^${userEmail}$`, 'i') } },
+      { $set: { name: trimmedName, image: finalImage, updatedAt: new Date() } }
+    );
+
+    // Sync across events and joined events
+    await Promise.all([
+      eventsCollection.updateMany(
+        { creatorEmail: { $regex: new RegExp(`^${userEmail}$`, 'i') } },
+        { $set: { creatorName: trimmedName } }
+      ),
+      joinedEventsCollection.updateMany(
+        { userEmail: { $regex: new RegExp(`^${userEmail}$`, 'i') } },
+        { $set: { userName: trimmedName } }
+      ),
+    ]);
+
+    res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      user: { name: trimmedName, email: userEmail, image: finalImage },
+    });
+  } catch (err) {
+    console.error('Error updating user profile:', err);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Event Management Backend running on http://localhost:${port}`);
 });
