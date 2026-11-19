@@ -27,11 +27,14 @@ import {
 
 export default function LoginPage() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSocialLoading, setIsSocialLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [toastMessage, setToastMessage] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const getRedirectPath = () => {
     if (typeof window !== "undefined") {
@@ -48,24 +51,37 @@ export default function LoginPage() {
     e.preventDefault();
     setErrorMessage("");
     setToastMessage("");
-    setIsLoading(true);
+    setFieldErrors({});
 
+    const trimmedEmail = email.trim();
     const formData = new FormData(e.currentTarget);
-    const email = formData.get("email")?.toString().trim() || "";
-    const password = formData.get("password")?.toString() || "";
     const remember = Boolean(formData.get("remember"));
 
-    if (!email || !password) {
-      setErrorMessage("Please enter both email and password.");
-      setIsLoading(false);
+    const errors = {};
+    if (!trimmedEmail) {
+      errors.email = "Email address is required.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      errors.email = "Please enter a valid email address (e.g. name@example.com).";
+    }
+
+    if (!password) {
+      errors.password = "Password is required.";
+    } else if (password.length < 6) {
+      errors.password = "Password must be at least 6 characters.";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setErrorMessage(errors.email || errors.password || "Please correct the highlighted validation errors.");
       return;
     }
 
+    setIsLoading(true);
     const redirectPath = getRedirectPath();
 
     try {
       const { data: resdata, error } = await signIn.email({
-        email,
+        email: trimmedEmail,
         password,
         rememberMe: remember,
         callbackURL: redirectPath,
@@ -107,7 +123,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center py-16 px-4 sm:px-6 bg-[#FAF8F5]">
+    <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center py-16 px-4 sm:px-6 bg-[#FAF8F5] dark:bg-[#0F0F0F] transition-colors">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-6 right-6 z-50 bg-emerald-600 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
@@ -143,7 +159,7 @@ export default function LoginPage() {
         )}
 
         {/* Form */}
-        <Form className="flex flex-col gap-5 relative z-10" onSubmit={onSubmit}>
+        <Form className="flex flex-col gap-5 relative z-10" onSubmit={onSubmit} noValidate>
           {/* Email Address */}
           <TextField
             isRequired
@@ -152,15 +168,28 @@ export default function LoginPage() {
             className="flex flex-col gap-1.5 w-full"
           >
             <Label className="text-xs font-semibold uppercase tracking-wider text-[#D9A441]">
-              Email Address
+              Email Address <span className="text-red-400">*</span>
             </Label>
             <div className="relative flex items-center">
               <Mail className="absolute left-3.5 w-4 h-4 text-[#777777] pointer-events-none" />
               <Input
                 placeholder="name@example.com"
-                className="w-full pl-10 pr-4 py-3 bg-[#181818] border border-[#2E2E2E] focus:border-[#D9A441] text-white placeholder-[#555555] rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#D9A441]/40"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: "" }));
+                }}
+                className={`w-full pl-10 pr-4 py-3 bg-[#181818] border text-white placeholder-[#555555] rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#D9A441]/40 ${
+                  fieldErrors.email ? "border-red-500 focus:border-red-500" : "border-[#2E2E2E] focus:border-[#D9A441]"
+                }`}
               />
             </div>
+            {fieldErrors.email && (
+              <p className="text-xs text-red-400 mt-1 flex items-center gap-1 font-sans">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                <span>{fieldErrors.email}</span>
+              </p>
+            )}
           </TextField>
 
           {/* Password */}
@@ -171,23 +200,36 @@ export default function LoginPage() {
             className="flex flex-col gap-1.5 w-full"
           >
             <Label className="text-xs font-semibold uppercase tracking-wider text-[#D9A441]">
-              Password
+              Password <span className="text-red-400">*</span>
             </Label>
             <div className="relative flex items-center">
               <Lock className="absolute left-3.5 w-4 h-4 text-[#777777] pointer-events-none" />
               <Input
                 placeholder="Enter your password"
-                className="w-full pl-10 pr-11 py-3 bg-[#181818] border border-[#2E2E2E] focus:border-[#D9A441] text-white placeholder-[#555555] rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#D9A441]/40"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: "" }));
+                }}
+                className={`w-full pl-10 pr-11 py-3 bg-[#181818] border text-white placeholder-[#555555] rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#D9A441]/40 ${
+                  fieldErrors.password ? "border-red-500 focus:border-red-500" : "border-[#2E2E2E] focus:border-[#D9A441]"
+                }`}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 text-[#777777] hover:text-[#D9A441] focus:outline-none transition-colors"
+                className="absolute right-3.5 text-[#777777] hover:text-[#D9A441] focus:outline-none transition-colors cursor-pointer"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
+            {fieldErrors.password && (
+              <p className="text-xs text-red-400 mt-1 flex items-center gap-1 font-sans">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                <span>{fieldErrors.password}</span>
+              </p>
+            )}
           </TextField>
 
           {/* Remember Me Option */}

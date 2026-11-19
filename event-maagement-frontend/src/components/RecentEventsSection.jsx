@@ -35,19 +35,19 @@ export default function RecentEventsSection() {
   }, []);
 
   return (
-    <section id="upcoming" className="py-24 bg-white text-[#101010]">
+    <section id="upcoming" className="py-24 bg-white dark:bg-[#101010] text-[#101010] dark:text-[#F5F1E8] transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-[#E8E2D5] mb-12">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-[#E8E2D5] dark:border-white/10 mb-12">
           <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0f766e]/10 border border-[#0f766e]/20 text-[#0f766e] text-xs font-semibold uppercase tracking-wider mb-3">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0f766e]/10 dark:bg-[#0f766e]/20 border border-[#0f766e]/20 text-[#0f766e] dark:text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-3">
               <Clock className="w-3.5 h-3.5" />
               <span>Next on Schedule</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-[#101010] tracking-tight">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-[#101010] dark:text-[#F5F1E8] tracking-tight">
               Recent Upcoming Events
             </h2>
-            <p className="text-sm sm:text-base text-[#666666] font-sans mt-2 max-w-2xl">
+            <p className="text-sm sm:text-base text-[#666666] dark:text-gray-400 font-sans mt-2 max-w-2xl">
               Showing the next 6 scheduled community service drives, sorted by the coming date first.
               Past events are excluded so your efforts stay focused on real-time community needs.
             </p>

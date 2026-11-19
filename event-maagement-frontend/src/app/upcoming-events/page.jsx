@@ -65,20 +65,20 @@ export default function UpcomingEventsPage() {
   }, [events, searchQuery]);
 
   return (
-    <main className="min-h-screen bg-[#FAF8F5] text-[#101010] pt-28 pb-24">
+    <main className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F0F0F] text-[#101010] dark:text-[#F5F1E8] pt-28 pb-24 transition-colors">
       {/* Page Header */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
         <div className="text-center max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0f766e]/10 border border-[#0f766e]/20 text-[#0f766e] text-xs font-semibold uppercase tracking-wider mb-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0f766e]/10 dark:bg-[#0f766e]/20 border border-[#0f766e]/20 text-[#0f766e] dark:text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-4">
             <Calendar className="w-3.5 h-3.5" />
             <span>Public Schedule</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-[#101010] tracking-tight mb-4">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-[#101010] dark:text-[#F5F1E8] tracking-tight mb-4">
             All Upcoming Community Events
           </h1>
 
-          <p className="text-base sm:text-lg text-[#666666] font-sans leading-relaxed">
+          <p className="text-base sm:text-lg text-[#666666] dark:text-gray-400 font-sans leading-relaxed">
             Discover scheduled volunteer drives, relief distributions, cleanups, and social welfare
             campaigns across your area. Sorted by the nearest coming date first.
           </p>
@@ -102,13 +102,13 @@ export default function UpcomingEventsPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search events, locations, or topics..."
-              className="w-full pl-11 pr-4 py-3 bg-white rounded-2xl border border-gray-200 shadow-xs focus:outline-none focus:ring-2 focus:ring-[#0f766e] text-sm text-[#101010] placeholder-gray-400"
+              className="w-full pl-11 pr-4 py-3 bg-white dark:bg-[#181818] rounded-2xl border border-gray-200 dark:border-white/10 shadow-xs focus:outline-none focus:ring-2 focus:ring-[#0f766e] text-sm text-[#101010] dark:text-[#F5F1E8] placeholder-gray-400"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-gray-600 bg-gray-100 px-2 py-0.5 rounded-md cursor-pointer"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-gray-600 bg-gray-100 dark:bg-white/10 px-2 py-0.5 rounded-md cursor-pointer"
               >
                 Clear
               </button>
@@ -125,9 +125,9 @@ export default function UpcomingEventsPage() {
         </div>
 
         {/* Status Counter */}
-        <div className="flex items-center justify-between mt-8 pt-4 border-t border-[#E8E2D5] text-xs text-[#777777]">
+        <div className="flex items-center justify-between mt-8 pt-4 border-t border-[#E8E2D5] dark:border-white/10 text-xs text-[#777777] dark:text-gray-400">
           <span>
-            Showing <strong className="text-[#101010]">{filteredEvents.length}</strong> upcoming drives
+            Showing <strong className="text-[#101010] dark:text-white">{filteredEvents.length}</strong> upcoming drives
             {selectedCategory !== "All" && ` under "${selectedCategory}"`}
           </span>
           {(selectedCategory !== "All" || searchQuery) && (

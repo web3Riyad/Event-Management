@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { MongoClient } from "mongodb";
+import { extractAndVerifyJwt } from "@/lib/jwt";
 
 const uri = process.env.MONGODB_URL;
 let client;
@@ -13,12 +14,13 @@ clientPromise = global._mongoClientPromise;
 
 export async function GET(request) {
   try {
+    const authUser = extractAndVerifyJwt(request);
     const { searchParams } = new URL(request.url);
-    const userEmail = searchParams.get("userEmail");
+    const userEmail = authUser?.email || searchParams.get("userEmail");
 
     if (!userEmail) {
       return NextResponse.json(
-        { error: "Authentication required. userEmail parameter is missing." },
+        { error: "Authentication required. Missing valid JWT Bearer token or userEmail parameter." },
         { status: 401 }
       );
     }
@@ -28,9 +30,16 @@ export async function GET(request) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 1500);
+      const authHeader = request.headers.get("authorization") || "";
       const backendRes = await fetch(
         `${backendUrl}/events/joined?userEmail=${encodeURIComponent(userEmail)}`,
-        { signal: controller.signal, cache: "no-store" }
+        {
+          headers: {
+            ...(authHeader ? { Authorization: authHeader } : {}),
+          },
+          signal: controller.signal,
+          cache: "no-store",
+        }
       );
       clearTimeout(timeoutId);
       if (backendRes.ok) {

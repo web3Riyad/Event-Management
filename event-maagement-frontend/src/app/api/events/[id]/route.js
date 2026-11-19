@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { MongoClient, ObjectId } from "mongodb";
+import { extractAndVerifyJwt } from "@/lib/jwt";
 
 const uri = process.env.MONGODB_URL;
 let client;
@@ -72,9 +73,10 @@ export async function GET(request, { params }) {
   }
 }
 
-// PUT update an event (Only the creator can update)
+// PUT update an event (Only the creator can update - Protected by JWT)
 export async function PUT(request, { params }) {
   try {
+    const authUser = extractAndVerifyJwt(request);
     const { id } = await params;
     const body = await request.json();
     const {
@@ -84,12 +86,12 @@ export async function PUT(request, { params }) {
       location,
       thumbnailImageUrl,
       eventDescription,
-      userEmail,
     } = body;
+    const userEmail = authUser?.email || body?.userEmail;
 
     if (!userEmail) {
       return NextResponse.json(
-        { error: "Authentication required. userEmail missing." },
+        { error: "Authentication required. Missing valid JWT or userEmail." },
         { status: 401 }
       );
     }
@@ -99,10 +101,14 @@ export async function PUT(request, { params }) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 1500);
+      const authHeader = request.headers.get("authorization") || "";
       const backendRes = await fetch(`${backendUrl}/events/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        headers: {
+          "Content-Type": "application/json",
+          ...(authHeader ? { Authorization: authHeader } : {}),
+        },
+        body: JSON.stringify({ ...body, userEmail }),
         signal: controller.signal,
       });
       clearTimeout(timeoutId);
@@ -176,16 +182,17 @@ export async function PUT(request, { params }) {
   }
 }
 
-// DELETE an event (Only the creator can delete)
+// DELETE an event (Only the creator can delete - Protected by JWT)
 export async function DELETE(request, { params }) {
   try {
+    const authUser = extractAndVerifyJwt(request);
     const { id } = await params;
     const { searchParams } = new URL(request.url);
-    const userEmail = searchParams.get("userEmail");
+    const userEmail = authUser?.email || searchParams.get("userEmail");
 
     if (!userEmail) {
       return NextResponse.json(
-        { error: "Authentication required. userEmail missing." },
+        { error: "Authentication required. Missing valid JWT or userEmail." },
         { status: 401 }
       );
     }
@@ -195,10 +202,14 @@ export async function DELETE(request, { params }) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 1500);
+      const authHeader = request.headers.get("authorization") || "";
       const backendRes = await fetch(
         `${backendUrl}/events/${id}?userEmail=${encodeURIComponent(userEmail)}`,
         {
           method: "DELETE",
+          headers: {
+            ...(authHeader ? { Authorization: authHeader } : {}),
+          },
           signal: controller.signal,
         }
       );

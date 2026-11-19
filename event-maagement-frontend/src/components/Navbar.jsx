@@ -21,6 +21,7 @@ import { cn } from "cn";
 
 // Real Auth Client hooks
 import { useSession, signOut } from "@/lib/auth-client";
+import ThemeToggle from "./ThemeToggle";
 
 // Shadcn UI Components
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -119,6 +120,9 @@ export default function Navbar() {
 
         {/* 3. Conditional Login/Logout (Desktop) */}
         <div className="hidden md:flex items-center gap-3">
+          {/* Theme Toggle Button */}
+          <ThemeToggle />
+
           {!isLoggedIn ? (
             /* If not logged in -> Show Login and Register buttons */
             <div className="flex items-center gap-3">
@@ -256,6 +260,9 @@ export default function Navbar() {
 
         {/* 4. Mobile Menu Navigation (using Shadcn Sheet) */}
         <div className="md:hidden flex items-center gap-2">
+          {/* Mobile Theme Toggle */}
+          <ThemeToggle />
+
           {isLoggedIn && (
             <Avatar className="size-8 ring-1 ring-[#D9A441]">
               <AvatarImage src={avatarUrl} alt={displayName} />

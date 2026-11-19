@@ -11,16 +11,16 @@ export default function HeroPart() {
       {/* Background Photography with Warm Social Service Theme */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=2000&q=80"
+          src="/bannar-background.jpg"
           alt="Community Service and Volunteerism Drive"
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center opacity-40 brightness-95 scale-100"
+          className="object-cover object-center opacity-85 brightness-105 contrast-105 scale-100"
         />
-        {/* Layered Gradient Overlays for contrast and Champagne Gold accents */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#101010] via-black/60 to-black/40" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#D9A441]/10 via-transparent to-transparent" />
+        {/* Subtle, soft overlays for text readability while preserving image brightness */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#101010]/80 via-black/30 to-black/20" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#D9A441]/15 via-transparent to-transparent" />
       </div>
 
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-32 pb-20">

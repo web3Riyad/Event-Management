@@ -23,6 +23,7 @@ import {
   X,
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
+import { getAuthHeaders } from "@/lib/jwt-client";
 import { formatEventDate } from "@/components/EventCard";
 
 const CATEGORIES = [
@@ -57,6 +58,7 @@ export default function ManageEventsPage() {
   });
   const [editFilePreview, setEditFilePreview] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [editFieldErrors, setEditFieldErrors] = useState({});
   const editFileInputRef = useRef(null);
 
   // Delete Confirmation Modal State
@@ -73,6 +75,71 @@ export default function ManageEventsPage() {
     }
   }, [isPending, isLoggedIn]);
 
+  // Minimum date selectable is tomorrow per requirement (future dates only)
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().split("T")[0];
+  const todayStr = new Date().toISOString().split("T")[0];
+
+  const validateEditField = (name, value) => {
+    let err = "";
+    if (name === "eventTitle") {
+      if (!value.trim()) err = "Event Title is required.";
+      else if (value.trim().length < 5) err = "Title must be at least 5 characters.";
+    } else if (name === "eventType") {
+      if (!value.trim()) err = "Category is required.";
+    } else if (name === "eventDate") {
+      if (!value) err = "Event Date is required.";
+      else if (value <= todayStr) err = "Event date must be in the future (after today).";
+    } else if (name === "location") {
+      if (!value.trim()) err = "Location is required.";
+      else if (value.trim().length < 3) err = "Location must be at least 3 characters.";
+    } else if (name === "eventDescription") {
+      if (!value.trim()) err = "Event Description is required.";
+      else if (value.trim().length < 20) err = "Description must be at least 20 characters.";
+    }
+    setEditFieldErrors((prev) => ({ ...prev, [name]: err }));
+    return err;
+  };
+
+  const validateEditForm = () => {
+    const errors = {};
+    if (!editFormData.eventTitle.trim()) {
+      errors.eventTitle = "Event Title is required.";
+    } else if (editFormData.eventTitle.trim().length < 5) {
+      errors.eventTitle = "Title must be at least 5 characters.";
+    }
+
+    if (!editFormData.eventType.trim()) {
+      errors.eventType = "Please select an event category.";
+    }
+
+    if (!editFormData.eventDate) {
+      errors.eventDate = "Event Date is required.";
+    } else if (editFormData.eventDate <= todayStr) {
+      errors.eventDate = "Event date must be strictly in the future (after today).";
+    }
+
+    if (!editFormData.location.trim()) {
+      errors.location = "Location is required.";
+    } else if (editFormData.location.trim().length < 3) {
+      errors.location = "Location must be at least 3 characters.";
+    }
+
+    if (!editFormData.thumbnailImageUrl) {
+      errors.thumbnailImageUrl = "Thumbnail image is required.";
+    }
+
+    if (!editFormData.eventDescription.trim()) {
+      errors.eventDescription = "Event Description is required.";
+    } else if (editFormData.eventDescription.trim().length < 20) {
+      errors.eventDescription = "Description must be at least 20 characters.";
+    }
+
+    setEditFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   // 1. Fetch events created by this logged-in user
   useEffect(() => {
     if (!isLoggedIn || !user?.email) return;
@@ -83,9 +150,10 @@ export default function ManageEventsPage() {
         setLoading(true);
         setError("");
 
+        const authHeaders = await getAuthHeaders(user);
         const res = await fetch(
           `/api/events/creator?creatorEmail=${encodeURIComponent(user.email)}`,
-          { cache: "no-store" }
+          { headers: authHeaders, cache: "no-store" }
         );
 
         if (!res.ok) {
@@ -115,7 +183,7 @@ export default function ManageEventsPage() {
     return () => {
       isMounted = false;
     };
-  }, [isPending, isLoggedIn, user?.email]);
+  }, [isPending, isLoggedIn, user]);
 
   // Open Edit Modal with event prefilled
   const handleOpenEditModal = (event) => {
@@ -181,13 +249,25 @@ export default function ManageEventsPage() {
     e.preventDefault();
     if (!editingEvent?._id) return;
 
+    if (!validateEditForm()) {
+      setNotification({
+        type: "error",
+        message: "Please correct the highlighted errors in the form before saving.",
+      });
+      return;
+    }
+
     try {
       setIsUpdating(true);
       setNotification({ type: "", message: "" });
 
+      const authHeaders = await getAuthHeaders(user, {
+        "Content-Type": "application/json",
+      });
+
       const res = await fetch(`/api/events/${editingEvent._id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders,
         body: JSON.stringify({
           ...editFormData,
           userEmail: user.email,
@@ -234,9 +314,13 @@ export default function ManageEventsPage() {
       setIsDeleting(true);
       setNotification({ type: "", message: "" });
 
+      const authHeaders = await getAuthHeaders(user);
       const res = await fetch(
         `/api/events/${deletingEvent._id}?userEmail=${encodeURIComponent(user.email)}`,
-        { method: "DELETE" }
+        {
+          method: "DELETE",
+          headers: authHeaders,
+        }
       );
 
       const data = await res.json();
@@ -283,19 +367,19 @@ export default function ManageEventsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#FAF8F5] text-[#101010] pt-28 pb-24">
+    <main className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F0F0F] text-[#101010] dark:text-[#F5F1E8] pt-28 pb-24 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-[#E8E2D5] mb-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-[#E8E2D5] dark:border-white/10 mb-8">
           <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-50 border border-purple-200 text-purple-800 text-xs font-semibold uppercase tracking-wider mb-3">
-              <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-purple-800 dark:text-purple-300 text-xs font-semibold uppercase tracking-wider mb-3">
+              <Sparkles className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
               <span>Organizer Management</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-[#101010] tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-[#101010] dark:text-[#F5F1E8] tracking-tight">
               Manage Your Created Events
             </h1>
-            <p className="text-sm sm:text-base text-[#666666] font-sans mt-2 max-w-2xl">
+            <p className="text-sm sm:text-base text-[#666666] dark:text-gray-400 font-sans mt-2 max-w-2xl">
               View, edit details, or remove community initiatives you have published.
               You can only modify events you created.
             </p>
@@ -315,15 +399,15 @@ export default function ManageEventsPage() {
           <div
             className={`p-4 rounded-2xl mb-8 flex items-center justify-between gap-3 text-sm font-medium ${
               notification.type === "success"
-                ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
-                : "bg-red-50 border border-red-200 text-red-800"
+                ? "bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300"
+                : "bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300"
             }`}
           >
             <div className="flex items-center gap-2.5">
               {notification.type === "success" ? (
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
               ) : (
-                <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+                <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0" />
               )}
               <span>{notification.message}</span>
             </div>
@@ -346,7 +430,7 @@ export default function ManageEventsPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search your created events..."
-              className="w-full pl-11 pr-4 py-2.5 bg-white rounded-2xl border border-gray-200 shadow-xs focus:outline-none focus:ring-2 focus:ring-[#0f766e] text-sm text-[#101010] placeholder-gray-400"
+              className="w-full pl-11 pr-4 py-2.5 bg-white dark:bg-[#181818] rounded-2xl border border-gray-200 dark:border-white/10 shadow-xs focus:outline-none focus:ring-2 focus:ring-[#0f766e] text-sm text-[#101010] dark:text-[#F5F1E8] placeholder-gray-400"
             />
             {searchQuery && (
               <button
@@ -512,99 +596,137 @@ export default function ManageEventsPage() {
           onClick={() => setEditingEvent(null)}
         >
           <div
-            className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-gray-200 my-8"
+            className="bg-white dark:bg-[#181818] rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-gray-200 dark:border-white/10 my-8 text-[#101010] dark:text-[#F5F1E8]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-6">
-              <div className="flex items-center gap-2 text-[#0f766e]">
+            <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-white/10 mb-6">
+              <div className="flex items-center gap-2 text-[#0f766e] dark:text-emerald-400">
                 <Pencil className="w-5 h-5" />
-                <h3 className="text-xl font-serif font-bold text-[#101010]">
+                <h3 className="text-xl font-serif font-bold text-[#101010] dark:text-[#F5F1E8]">
                   Update Event
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setEditingEvent(null)}
-                className="p-1 rounded-full text-gray-400 hover:text-black hover:bg-gray-100 cursor-pointer"
+                className="p-1 rounded-full text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleUpdateSubmit} className="space-y-5">
+            <form onSubmit={handleUpdateSubmit} className="space-y-5" noValidate>
               {/* Event Title */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-                  Event Title
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
+                  Event Title <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={editFormData.eventTitle}
-                  onChange={(e) =>
-                    setEditFormData((prev) => ({ ...prev, eventTitle: e.target.value }))
-                  }
-                  required
-                  className="w-full px-4 py-2.5 bg-[#FAF8F5] border border-gray-200 rounded-xl text-sm text-[#101010] focus:ring-2 focus:ring-[#0f766e] focus:bg-white focus:outline-none"
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setEditFormData((prev) => ({ ...prev, eventTitle: val }));
+                    validateEditField("eventTitle", val);
+                  }}
+                  className={`w-full px-4 py-2.5 bg-[#FAF8F5] dark:bg-[#202020] border rounded-xl text-sm text-[#101010] dark:text-[#F5F1E8] focus:ring-2 focus:ring-[#0f766e] focus:outline-none ${
+                    editFieldErrors.eventTitle ? "border-red-500" : "border-gray-200 dark:border-white/10"
+                  }`}
                 />
+                {editFieldErrors.eventTitle && (
+                  <p className="text-xs text-red-500 mt-1 flex items-center gap-1 font-sans">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{editFieldErrors.eventTitle}</span>
+                  </p>
+                )}
               </div>
 
               {/* Event Type & Date */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-                    Category
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
+                    Category <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={editFormData.eventType}
-                    onChange={(e) =>
-                      setEditFormData((prev) => ({ ...prev, eventType: e.target.value }))
-                    }
-                    className="w-full px-4 py-2.5 bg-[#FAF8F5] border border-gray-200 rounded-xl text-sm text-[#101010] focus:ring-2 focus:ring-[#0f766e] focus:bg-white focus:outline-none cursor-pointer"
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setEditFormData((prev) => ({ ...prev, eventType: val }));
+                      validateEditField("eventType", val);
+                    }}
+                    className={`w-full px-4 py-2.5 bg-[#FAF8F5] dark:bg-[#202020] border rounded-xl text-sm text-[#101010] dark:text-[#F5F1E8] focus:ring-2 focus:ring-[#0f766e] focus:outline-none cursor-pointer ${
+                      editFieldErrors.eventType ? "border-red-500" : "border-gray-200 dark:border-white/10"
+                    }`}
                   >
                     {CATEGORIES.map((c) => (
-                      <option key={c} value={c}>
+                      <option key={c} value={c} className="dark:bg-[#202020] dark:text-white">
                         {c}
                       </option>
                     ))}
                   </select>
+                  {editFieldErrors.eventType && (
+                    <p className="text-xs text-red-500 mt-1 flex items-center gap-1 font-sans">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{editFieldErrors.eventType}</span>
+                    </p>
+                  )}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-                    Event Date
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
+                    Event Date <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="date"
+                    min={tomorrowStr}
                     value={editFormData.eventDate}
-                    onChange={(e) =>
-                      setEditFormData((prev) => ({ ...prev, eventDate: e.target.value }))
-                    }
-                    required
-                    className="w-full px-4 py-2.5 bg-[#FAF8F5] border border-gray-200 rounded-xl text-sm text-[#101010] focus:ring-2 focus:ring-[#0f766e] focus:bg-white focus:outline-none cursor-pointer"
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setEditFormData((prev) => ({ ...prev, eventDate: val }));
+                      validateEditField("eventDate", val);
+                    }}
+                    className={`w-full px-4 py-2.5 bg-[#FAF8F5] dark:bg-[#202020] border rounded-xl text-sm text-[#101010] dark:text-[#F5F1E8] focus:ring-2 focus:ring-[#0f766e] focus:outline-none cursor-pointer ${
+                      editFieldErrors.eventDate ? "border-red-500" : "border-gray-200 dark:border-white/10"
+                    }`}
                   />
+                  {editFieldErrors.eventDate && (
+                    <p className="text-xs text-red-500 mt-1 flex items-center gap-1 font-sans">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{editFieldErrors.eventDate}</span>
+                    </p>
+                  )}
                 </div>
               </div>
 
               {/* Location */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-                  Location / Venue
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
+                  Location / Venue <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={editFormData.location}
-                  onChange={(e) =>
-                    setEditFormData((prev) => ({ ...prev, location: e.target.value }))
-                  }
-                  required
-                  className="w-full px-4 py-2.5 bg-[#FAF8F5] border border-gray-200 rounded-xl text-sm text-[#101010] focus:ring-2 focus:ring-[#0f766e] focus:bg-white focus:outline-none"
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setEditFormData((prev) => ({ ...prev, location: val }));
+                    validateEditField("location", val);
+                  }}
+                  className={`w-full px-4 py-2.5 bg-[#FAF8F5] dark:bg-[#202020] border rounded-xl text-sm text-[#101010] dark:text-[#F5F1E8] focus:ring-2 focus:ring-[#0f766e] focus:outline-none ${
+                    editFieldErrors.location ? "border-red-500" : "border-gray-200 dark:border-white/10"
+                  }`}
                 />
+                {editFieldErrors.location && (
+                  <p className="text-xs text-red-500 mt-1 flex items-center gap-1 font-sans">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{editFieldErrors.location}</span>
+                  </p>
+                )}
               </div>
 
               {/* Thumbnail Image Picker */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-                  Update Thumbnail Image
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
+                  Update Thumbnail Image <span className="text-red-500">*</span>
                 </label>
                 <input
                   ref={editFileInputRef}
@@ -616,7 +738,7 @@ export default function ManageEventsPage() {
 
                 <div className="flex items-center gap-4">
                   {editFilePreview && (
-                    <div className="relative h-20 w-28 rounded-xl overflow-hidden border border-gray-200 shrink-0 bg-gray-100">
+                    <div className="relative h-20 w-28 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shrink-0 bg-gray-100 dark:bg-gray-800">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={editFilePreview}
@@ -629,38 +751,54 @@ export default function ManageEventsPage() {
                   <button
                     type="button"
                     onClick={() => editFileInputRef.current?.click()}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-[#FAF8F5] hover:bg-gray-100 border border-gray-300 text-gray-700 text-xs font-semibold rounded-xl transition-all cursor-pointer"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-[#FAF8F5] dark:bg-[#202020] hover:bg-gray-100 dark:hover:bg-white/10 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 text-xs font-semibold rounded-xl transition-all cursor-pointer"
                   >
-                    <UploadCloud className="w-4 h-4 text-[#0f766e]" />
+                    <UploadCloud className="w-4 h-4 text-[#0f766e] dark:text-[#D9A441]" />
                     <span>Choose New Photo from Device</span>
                   </button>
                 </div>
+                {editFieldErrors.thumbnailImageUrl && (
+                  <p className="text-xs text-red-500 mt-1 flex items-center gap-1 font-sans">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{editFieldErrors.thumbnailImageUrl}</span>
+                  </p>
+                )}
               </div>
 
               {/* Event Description */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-                  Description
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
+                  Description <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   rows={3}
                   value={editFormData.eventDescription}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const val = e.target.value;
                     setEditFormData((prev) => ({
                       ...prev,
-                      eventDescription: e.target.value,
-                    }))
-                  }
-                  className="w-full px-4 py-2.5 bg-[#FAF8F5] border border-gray-200 rounded-xl text-sm text-[#101010] focus:ring-2 focus:ring-[#0f766e] focus:bg-white focus:outline-none leading-relaxed"
+                      eventDescription: val,
+                    }));
+                    validateEditField("eventDescription", val);
+                  }}
+                  className={`w-full px-4 py-2.5 bg-[#FAF8F5] dark:bg-[#202020] border rounded-xl text-sm text-[#101010] dark:text-[#F5F1E8] focus:ring-2 focus:ring-[#0f766e] focus:outline-none leading-relaxed ${
+                    editFieldErrors.eventDescription ? "border-red-500" : "border-gray-200 dark:border-white/10"
+                  }`}
                 />
+                {editFieldErrors.eventDescription && (
+                  <p className="text-xs text-red-500 mt-1 flex items-center gap-1 font-sans">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{editFieldErrors.eventDescription}</span>
+                  </p>
+                )}
               </div>
 
               {/* Form Buttons */}
-              <div className="pt-4 border-t border-gray-100 flex items-center justify-end gap-3">
+              <div className="pt-4 border-t border-gray-100 dark:border-white/10 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setEditingEvent(null)}
-                  className="px-5 py-2.5 text-xs font-semibold text-gray-600 hover:text-black cursor-pointer"
+                  className="px-5 py-2.5 text-xs font-semibold text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -684,20 +822,20 @@ export default function ManageEventsPage() {
           onClick={() => setDeletingEvent(null)}
         >
           <div
-            className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-gray-200 text-center"
+            className="bg-white dark:bg-[#181818] rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-gray-200 dark:border-white/10 text-center text-[#101010] dark:text-[#F5F1E8]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-3 bg-red-100 text-red-600 rounded-2xl w-fit mx-auto mb-4">
+            <div className="p-3 bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400 rounded-2xl w-fit mx-auto mb-4">
               <Trash2 className="w-7 h-7" />
             </div>
 
-            <h3 className="text-xl font-serif font-bold text-[#101010] mb-2">
+            <h3 className="text-xl font-serif font-bold text-[#101010] dark:text-[#F5F1E8] mb-2">
               Delete Event?
             </h3>
 
-            <p className="text-xs sm:text-sm text-gray-600 leading-relaxed font-sans mb-6">
+            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-sans mb-6">
               Are you sure you want to delete{" "}
-              <strong className="text-gray-900">&quot;{deletingEvent.eventTitle}&quot;</strong>?
+              <strong className="text-gray-900 dark:text-white">&quot;{deletingEvent.eventTitle}&quot;</strong>?
               This will permanently remove the event and all volunteer registrations.
               This action cannot be undone.
             </p>
@@ -706,7 +844,7 @@ export default function ManageEventsPage() {
               <button
                 type="button"
                 onClick={() => setDeletingEvent(null)}
-                className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-xl transition-all cursor-pointer"
+                className="px-5 py-2.5 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-gray-700 dark:text-gray-300 text-xs font-semibold rounded-xl transition-all cursor-pointer"
               >
                 Keep Event
               </button>

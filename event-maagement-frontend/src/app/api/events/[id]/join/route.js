@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { MongoClient, ObjectId } from "mongodb";
+import { extractAndVerifyJwt } from "@/lib/jwt";
 
 const uri = process.env.MONGODB_URL;
 let client;
@@ -63,16 +64,18 @@ export async function GET(request, { params }) {
   }
 }
 
-// POST: Join an event (Stores event and user data in database)
+// POST: Join an event (Stores event and user data in database - Protected by JWT)
 export async function POST(request, { params }) {
   try {
+    const authUser = extractAndVerifyJwt(request);
     const { id } = await params;
     const body = await request.json();
-    const { userId, userName, userEmail } = body;
+    const { userId, userName } = body;
+    const userEmail = authUser?.email || body?.userEmail;
 
     if (!userEmail) {
       return NextResponse.json(
-        { error: "Authentication required to join an event." },
+        { error: "Authentication required to join an event. Missing valid JWT or user email." },
         { status: 401 }
       );
     }
@@ -82,10 +85,14 @@ export async function POST(request, { params }) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 1500);
+      const authHeader = request.headers.get("authorization") || "";
       const backendRes = await fetch(`${backendUrl}/events/${id}/join`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        headers: {
+          "Content-Type": "application/json",
+          ...(authHeader ? { Authorization: authHeader } : {}),
+        },
+        body: JSON.stringify({ ...body, userEmail }),
         signal: controller.signal,
       });
       clearTimeout(timeoutId);

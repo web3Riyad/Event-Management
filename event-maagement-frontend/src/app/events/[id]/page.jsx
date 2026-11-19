@@ -20,6 +20,7 @@ import {
   Tag,
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
+import { getAuthHeaders } from "@/lib/jwt-client";
 import { formatEventDate } from "@/components/EventCard";
 
 export default function EventDetailsPage({ params }) {
@@ -112,9 +113,13 @@ export default function EventDetailsPage({ params }) {
       setJoinErrorMessage("");
       setJoinSuccessMessage("");
 
+      const authHeaders = await getAuthHeaders(user, {
+        "Content-Type": "application/json",
+      });
+
       const res = await fetch(`/api/events/${eventId}/join`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders,
         body: JSON.stringify({
           userId: user.id || null,
           userName: user.name || "Volunteer",
@@ -186,13 +191,13 @@ export default function EventDetailsPage({ params }) {
   const formattedDate = formatEventDate(event.eventDate);
 
   return (
-    <main className="min-h-screen bg-[#FAF8F5] text-[#101010] pt-28 pb-24">
+    <main className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F0F0F] text-[#101010] dark:text-[#F5F1E8] pt-28 pb-24 transition-colors">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Navigation Breadcrumb */}
         <div className="mb-6">
           <Link
             href="/upcoming-events"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-gray-600 hover:text-[#0f766e] transition-colors"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-gray-600 dark:text-gray-400 hover:text-[#0f766e] dark:hover:text-[#D9A441] transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back to All Upcoming Events</span>
@@ -200,7 +205,7 @@ export default function EventDetailsPage({ params }) {
         </div>
 
         {/* Hero Card */}
-        <div className="bg-white rounded-3xl border border-[#E8E2D5] overflow-hidden shadow-xs">
+        <div className="bg-white dark:bg-[#181818] rounded-3xl border border-[#E8E2D5] dark:border-white/10 overflow-hidden shadow-xs">
           {/* Main Photo Banner with fill & sizes */}
           <div className="relative h-72 sm:h-96 md:h-[420px] w-full overflow-hidden bg-gray-900">
             <Image
@@ -296,21 +301,21 @@ export default function EventDetailsPage({ params }) {
             {/* Description Section */}
             <div className="space-y-6">
               <div>
-                <h3 className="text-xl sm:text-2xl font-serif font-bold text-[#101010] mb-3">
+                <h3 className="text-xl sm:text-2xl font-serif font-bold text-[#101010] dark:text-[#F5F1E8] mb-3">
                   About This Initiative
                 </h3>
-                <p className="text-base text-gray-700 leading-relaxed font-sans whitespace-pre-line">
+                <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed font-sans whitespace-pre-line">
                   {event.eventDescription}
                 </p>
               </div>
 
               {/* Volunteer Impact & Guidelines */}
-              <div className="p-6 bg-white rounded-2xl border border-[#E8E2D5] space-y-3">
-                <div className="flex items-center gap-2 text-sm font-bold text-[#0f766e]">
+              <div className="p-6 bg-white dark:bg-[#202020] rounded-2xl border border-[#E8E2D5] dark:border-white/10 space-y-3">
+                <div className="flex items-center gap-2 text-sm font-bold text-[#0f766e] dark:text-emerald-400">
                   <ShieldCheck className="w-4 h-4" />
                   <span>Volunteer Code of Conduct & Safety</span>
                 </div>
-                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed font-sans">
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-sans">
                   All community members are encouraged to arrive 15 minutes prior to start time.
                   Basic equipment, gloves, drinking water, and field supplies will be provided by
                   the event organizers on site.

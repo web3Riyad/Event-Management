@@ -23,6 +23,8 @@ import {
   AlertCircle,
   Camera,
   CheckCircle2,
+  Check,
+  X,
   UploadCloud,
   Trash2,
   ImageIcon,
@@ -33,11 +35,20 @@ export default function SignUpPage() {
   const router = useRouter();
   const fileInputRef = useRef(null);
 
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSocialLoading, setIsSocialLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [toastMessage, setToastMessage] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  // Password rules evaluation for live feedback
+  const hasMinLength = password.length >= 6;
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasLowerCase = /[a-z]/.test(password);
 
   // Photo state (file from device or URL)
   const [avatarPreview, setAvatarPreview] = useState("");
@@ -124,11 +135,10 @@ export default function SignUpPage() {
     e.preventDefault();
     setErrorMessage("");
     setToastMessage("");
+    setFieldErrors({});
 
-    const formData = new FormData(e.currentTarget);
-    const name = formData.get("name")?.toString().trim() || "";
-    const email = formData.get("email")?.toString().trim() || "";
-    const password = formData.get("password")?.toString() || "";
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
 
     // Determine final photo (uploaded device photo, manual URL, or fallback)
     const finalPhoto =
@@ -136,30 +146,41 @@ export default function SignUpPage() {
       photoURLInput.trim() ||
       "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400";
 
-    // Required field validation
-    if (!name) {
-      setErrorMessage("Please enter your name.");
-      return;
-    }
-    if (!email) {
-      setErrorMessage("Please enter your email address.");
-      return;
+    const errors = {};
+
+    // 1. Name validation
+    if (!trimmedName) {
+      errors.name = "Full name is required.";
+    } else if (trimmedName.length < 2) {
+      errors.name = "Name must be at least 2 characters long.";
     }
 
-    // Password validation rule per assignment requirements:
-    // 1. Must have an uppercase letter
-    // 2. Must have a lowercase letter
-    // 3. Length of at least 6 characters
-    if (password.length < 6) {
-      setErrorMessage("Password must be at least 6 characters long.");
-      return;
+    // 2. Email validation
+    if (!trimmedEmail) {
+      errors.email = "Email address is required.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      errors.email = "Please enter a valid email address (e.g. name@example.com).";
     }
-    if (!/[A-Z]/.test(password)) {
-      setErrorMessage("Password must contain at least one uppercase letter (A-Z).");
-      return;
+
+    // 3. Password validation rules per assignment:
+    // - Must have an uppercase letter
+    // - Must have a lowercase letter
+    // - Length of at least 6 characters
+    if (!password) {
+      errors.password = "Password is required.";
+    } else if (password.length < 6) {
+      errors.password = "Password must be at least 6 characters long.";
+    } else if (!/[A-Z]/.test(password)) {
+      errors.password = "Password must contain at least one uppercase letter (A-Z).";
+    } else if (!/[a-z]/.test(password)) {
+      errors.password = "Password must contain at least one lowercase letter (a-z).";
     }
-    if (!/[a-z]/.test(password)) {
-      setErrorMessage("Password must contain at least one lowercase letter (a-z).");
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setErrorMessage(
+        errors.password || errors.email || errors.name || "Please complete all fields properly."
+      );
       return;
     }
 
@@ -167,8 +188,8 @@ export default function SignUpPage() {
       setIsLoading(true);
 
       const { data: resdata, error } = await signUp.email({
-        name,
-        email,
+        name: trimmedName,
+        email: trimmedEmail,
         password,
         image: finalPhoto,
         callbackURL: "/",
@@ -195,7 +216,7 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center py-16 px-4 sm:px-6 bg-[#FAF8F5]">
+    <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center py-16 px-4 sm:px-6 bg-[#FAF8F5] dark:bg-[#0F0F0F] transition-colors">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-6 right-6 z-50 bg-emerald-600 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
@@ -284,7 +305,7 @@ export default function SignUpPage() {
         )}
 
         {/* Registration Form */}
-        <Form className="flex flex-col gap-5 relative z-10" onSubmit={onSubmit}>
+        <Form className="flex flex-col gap-5 relative z-10" onSubmit={onSubmit} noValidate>
           {/* 1. Name Field */}
           <TextField
             isRequired
@@ -299,9 +320,22 @@ export default function SignUpPage() {
               <User className="absolute left-3.5 w-4 h-4 text-[#777777] pointer-events-none" />
               <Input
                 placeholder="John Doe"
-                className="w-full pl-10 pr-4 py-3 bg-[#181818] border border-[#2E2E2E] focus:border-[#D9A441] text-white placeholder-[#555555] rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#D9A441]/40"
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  if (fieldErrors.name) setFieldErrors((prev) => ({ ...prev, name: "" }));
+                }}
+                className={`w-full pl-10 pr-4 py-3 bg-[#181818] border text-white placeholder-[#555555] rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#D9A441]/40 ${
+                  fieldErrors.name ? "border-red-500 focus:border-red-500" : "border-[#2E2E2E] focus:border-[#D9A441]"
+                }`}
               />
             </div>
+            {fieldErrors.name && (
+              <p className="text-xs text-red-400 mt-1 flex items-center gap-1 font-sans">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                <span>{fieldErrors.name}</span>
+              </p>
+            )}
           </TextField>
 
           {/* 2. Email Field */}
@@ -318,9 +352,22 @@ export default function SignUpPage() {
               <Mail className="absolute left-3.5 w-4 h-4 text-[#777777] pointer-events-none" />
               <Input
                 placeholder="volunteer@example.com"
-                className="w-full pl-10 pr-4 py-3 bg-[#181818] border border-[#2E2E2E] focus:border-[#D9A441] text-white placeholder-[#555555] rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#D9A441]/40"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: "" }));
+                }}
+                className={`w-full pl-10 pr-4 py-3 bg-[#181818] border text-white placeholder-[#555555] rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#D9A441]/40 ${
+                  fieldErrors.email ? "border-red-500 focus:border-red-500" : "border-[#2E2E2E] focus:border-[#D9A441]"
+                }`}
               />
             </div>
+            {fieldErrors.email && (
+              <p className="text-xs text-red-400 mt-1 flex items-center gap-1 font-sans">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                <span>{fieldErrors.email}</span>
+              </p>
+            )}
           </TextField>
 
           {/* 3. Photo Picker (From Device or URL) */}
@@ -444,20 +491,70 @@ export default function SignUpPage() {
               <Lock className="absolute left-3.5 w-4 h-4 text-[#777777] pointer-events-none" />
               <Input
                 placeholder="At least 6 characters, uppercase & lowercase"
-                className="w-full pl-10 pr-11 py-3 bg-[#181818] border border-[#2E2E2E] focus:border-[#D9A441] text-white placeholder-[#555555] rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#D9A441]/40"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: "" }));
+                }}
+                className={`w-full pl-10 pr-11 py-3 bg-[#181818] border text-white placeholder-[#555555] rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#D9A441]/40 ${
+                  fieldErrors.password ? "border-red-500 focus:border-red-500" : "border-[#2E2E2E] focus:border-[#D9A441]"
+                }`}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 text-[#777777] hover:text-[#D9A441] focus:outline-none transition-colors"
+                className="absolute right-3.5 text-[#777777] hover:text-[#D9A441] focus:outline-none transition-colors cursor-pointer"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
-            <p className="text-[11px] text-[#777777] mt-0.5">
-              Must include at least 1 uppercase letter, 1 lowercase letter, and min 6 characters.
-            </p>
+            {fieldErrors.password && (
+              <p className="text-xs text-red-400 mt-1 flex items-center gap-1 font-sans">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                <span>{fieldErrors.password}</span>
+              </p>
+            )}
+
+            {/* Real-time Password Rules Checklist */}
+            <div className="mt-2 p-3 rounded-xl bg-black/40 border border-[#262626] space-y-1.5 text-xs">
+              <div
+                className={`flex items-center gap-2 transition-colors ${
+                  hasMinLength ? "text-emerald-400 font-medium" : "text-[#777777]"
+                }`}
+              >
+                {hasMinLength ? (
+                  <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                ) : (
+                  <div className="w-3.5 h-3.5 rounded-full border border-[#555555] shrink-0" />
+                )}
+                <span>At least 6 characters</span>
+              </div>
+              <div
+                className={`flex items-center gap-2 transition-colors ${
+                  hasUpperCase ? "text-emerald-400 font-medium" : "text-[#777777]"
+                }`}
+              >
+                {hasUpperCase ? (
+                  <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                ) : (
+                  <div className="w-3.5 h-3.5 rounded-full border border-[#555555] shrink-0" />
+                )}
+                <span>At least one uppercase letter (A-Z)</span>
+              </div>
+              <div
+                className={`flex items-center gap-2 transition-colors ${
+                  hasLowerCase ? "text-emerald-400 font-medium" : "text-[#777777]"
+                }`}
+              >
+                {hasLowerCase ? (
+                  <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                ) : (
+                  <div className="w-3.5 h-3.5 rounded-full border border-[#555555] shrink-0" />
+                )}
+                <span>At least one lowercase letter (a-z)</span>
+              </div>
+            </div>
           </TextField>
 
           {/* Submit Action */}

@@ -19,6 +19,7 @@ import {
   Eye,
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
+import { getAuthHeaders } from "@/lib/jwt-client";
 import { formatEventDate } from "@/components/EventCard";
 
 export default function JoinedEventsPage() {
@@ -51,9 +52,10 @@ export default function JoinedEventsPage() {
         setLoading(true);
         setError("");
 
+        const authHeaders = await getAuthHeaders(user);
         const res = await fetch(
           `/api/events/joined?userEmail=${encodeURIComponent(user.email)}`,
-          { cache: "no-store" }
+          { headers: authHeaders, cache: "no-store" }
         );
 
         if (!res.ok) {
@@ -121,20 +123,20 @@ export default function JoinedEventsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#FAF8F5] text-[#101010] pt-28 pb-24">
+    <main className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F0F0F] text-[#101010] dark:text-[#F5F1E8] pt-28 pb-24 transition-colors">
       {/* Header Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
         <div className="text-center max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold uppercase tracking-wider mb-4">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-4">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             <span>My Volunteer Schedule</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-[#101010] tracking-tight mb-4">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-[#101010] dark:text-[#F5F1E8] tracking-tight mb-4">
             Your Joined Events
           </h1>
 
-          <p className="text-base sm:text-lg text-[#666666] font-sans leading-relaxed">
+          <p className="text-base sm:text-lg text-[#666666] dark:text-gray-400 font-sans leading-relaxed">
             All community initiatives you have registered to join as a volunteer, sorted by event date.
           </p>
         </div>
@@ -149,13 +151,13 @@ export default function JoinedEventsPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Filter your joined events..."
-              className="w-full pl-11 pr-4 py-2.5 bg-white rounded-2xl border border-gray-200 shadow-xs focus:outline-none focus:ring-2 focus:ring-[#0f766e] text-sm text-[#101010] placeholder-gray-400"
+              className="w-full pl-11 pr-4 py-2.5 bg-white dark:bg-[#181818] rounded-2xl border border-gray-200 dark:border-white/10 shadow-xs focus:outline-none focus:ring-2 focus:ring-[#0f766e] text-sm text-[#101010] dark:text-[#F5F1E8] placeholder-gray-400"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-gray-600 bg-gray-100 px-2 py-0.5 rounded-md cursor-pointer"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-gray-600 bg-gray-100 dark:bg-white/10 px-2 py-0.5 rounded-md cursor-pointer"
               >
                 Clear
               </button>
@@ -166,9 +168,9 @@ export default function JoinedEventsPage() {
           <button
             type="button"
             onClick={() => setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"))}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-2xl text-xs font-semibold text-gray-700 hover:text-black hover:border-gray-300 shadow-xs transition-all cursor-pointer shrink-0"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-[#181818] border border-gray-200 dark:border-white/10 rounded-2xl text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white hover:border-gray-300 shadow-xs transition-all cursor-pointer shrink-0"
           >
-            <ArrowUpDown className="w-3.5 h-3.5 text-[#0f766e]" />
+            <ArrowUpDown className="w-3.5 h-3.5 text-[#0f766e] dark:text-[#D9A441]" />
             <span>
               Sort by Date: {sortDirection === "asc" ? "Earliest First" : "Latest First"}
             </span>
@@ -176,13 +178,13 @@ export default function JoinedEventsPage() {
         </div>
 
         {/* Counter Bar */}
-        <div className="flex items-center justify-between mt-8 pt-4 border-t border-[#E8E2D5] text-xs text-[#777777] max-w-4xl mx-auto">
+        <div className="flex items-center justify-between mt-8 pt-4 border-t border-[#E8E2D5] dark:border-white/10 text-xs text-[#777777] dark:text-gray-400 max-w-4xl mx-auto">
           <span>
-            Registered for <strong className="text-[#101010]">{processedEvents.length}</strong> event{processedEvents.length === 1 ? "" : "s"}
+            Registered for <strong className="text-[#101010] dark:text-white">{processedEvents.length}</strong> event{processedEvents.length === 1 ? "" : "s"}
           </span>
           <Link
             href="/upcoming-events"
-            className="text-[#0f766e] hover:underline font-semibold flex items-center gap-1"
+            className="text-[#0f766e] dark:text-[#D9A441] hover:underline font-semibold flex items-center gap-1"
           >
             <span>Explore More Drives</span>
             <ArrowRight className="w-3 h-3" />

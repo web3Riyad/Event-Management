@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { MongoClient } from "mongodb";
+import { extractAndVerifyJwt } from "@/lib/jwt";
 
 const uri = process.env.MONGODB_URL;
 let client;
@@ -13,12 +14,13 @@ clientPromise = global._mongoClientPromise;
 
 export async function GET(request) {
   try {
+    const authUser = extractAndVerifyJwt(request);
     const { searchParams } = new URL(request.url);
-    const creatorEmail = searchParams.get("creatorEmail");
+    const creatorEmail = authUser?.email || searchParams.get("creatorEmail");
 
     if (!creatorEmail) {
       return NextResponse.json(
-        { error: "creatorEmail query parameter is required" },
+        { error: "creatorEmail query parameter or valid JWT Bearer token is required" },
         { status: 400 }
       );
     }
@@ -28,9 +30,16 @@ export async function GET(request) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 1500);
+      const authHeader = request.headers.get("authorization") || "";
       const backendRes = await fetch(
         `${backendUrl}/events/creator?creatorEmail=${encodeURIComponent(creatorEmail)}`,
-        { signal: controller.signal, cache: "no-store" }
+        {
+          headers: {
+            ...(authHeader ? { Authorization: authHeader } : {}),
+          },
+          signal: controller.signal,
+          cache: "no-store",
+        }
       );
       clearTimeout(timeoutId);
       if (backendRes.ok) {

@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { MongoClient, ObjectId } from 'mongodb';
+import { signJwt, verifyJwt, requireJwtAuth } from './jwt.js';
 
 const uri = `mongodb://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@ac-dyizrz2-shard-00-00.khhcdmh.mongodb.net:27017,ac-dyizrz2-shard-00-01.khhcdmh.mongodb.net:27017,ac-dyizrz2-shard-00-02.khhcdmh.mongodb.net:27017/?ssl=true&replicaSet=atlas-ej3urr-shard-0&authSource=admin`;
 const client = new MongoClient(uri);
@@ -31,6 +32,28 @@ connectToMongoDB();
 // Health check endpoint
 app.get('/', (req, res) => {
   res.send('Event Management API is running...');
+});
+
+// Issue JWT Token endpoint (Challenge Requirement: JWT Protection)
+app.post(['/jwt', '/api/jwt', '/auth/jwt'], (req, res) => {
+  try {
+    const { email, name, id } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: 'User email is required to generate a JWT token.' });
+    }
+
+    const token = signJwt({
+      id: id || null,
+      email: email.trim().toLowerCase(),
+      name: name || 'User',
+      role: 'user',
+    });
+
+    res.json({ token, message: 'JWT token generated successfully' });
+  } catch (err) {
+    console.error('Error generating JWT:', err);
+    res.status(500).json({ error: 'Failed to generate JWT token' });
+  }
 });
 
 // GET all events with optional filters (timeframe=upcoming|past, eventType=Cleanup|Donation|..., limit=6)
@@ -140,11 +163,12 @@ app.get('/events/:id', async (req, res) => {
   }
 });
 
-// POST join an event (User must be authenticated)
-app.post('/events/:id/join', async (req, res) => {
+// POST join an event (User must be authenticated with JWT)
+app.post('/events/:id/join', requireJwtAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    const { userId, userName, userEmail } = req.body;
+    const { userId, userName } = req.body;
+    const userEmail = req.user?.email || req.body?.userEmail;
 
     if (!userEmail) {
       return res.status(401).json({ error: 'Authentication required. User email missing.' });
@@ -229,10 +253,10 @@ app.get('/events/:id/join', async (req, res) => {
   }
 });
 
-// GET all joined events for a user (sorted by eventDate)
-app.get(['/user/joined-events', '/events/joined'], async (req, res) => {
+// GET all joined events for a user (sorted by eventDate - Protected by JWT)
+app.get(['/user/joined-events', '/events/joined'], requireJwtAuth, async (req, res) => {
   try {
-    const { userEmail } = req.query;
+    const userEmail = req.user?.email || req.query.userEmail;
     if (!userEmail) {
       return res.status(400).json({ error: 'userEmail query parameter is required' });
     }
@@ -247,8 +271,8 @@ app.get(['/user/joined-events', '/events/joined'], async (req, res) => {
   }
 });
 
-// POST create a new event
-app.post('/events', async (req, res) => {
+// POST create a new event (Protected by JWT)
+app.post('/events', requireJwtAuth, async (req, res) => {
   try {
     const {
       eventTitle,
@@ -257,10 +281,10 @@ app.post('/events', async (req, res) => {
       location,
       thumbnailImageUrl,
       eventDescription,
-      creatorEmail,
       creatorName,
       creatorId,
     } = req.body;
+    const creatorEmail = req.user?.email || req.body?.creatorEmail;
 
     if (!eventTitle || !eventType || !eventDate) {
       return res.status(400).json({ error: 'eventTitle, eventType, and eventDate are required' });
@@ -292,10 +316,10 @@ app.post('/events', async (req, res) => {
   }
 });
 
-// GET all created events for a creator
-app.get(['/events/creator', '/user/created-events'], async (req, res) => {
+// GET all created events for a creator (Protected by JWT)
+app.get(['/events/creator', '/user/created-events'], requireJwtAuth, async (req, res) => {
   try {
-    const { creatorEmail } = req.query;
+    const creatorEmail = req.user?.email || req.query.creatorEmail;
     if (!creatorEmail) {
       return res.status(400).json({ error: 'creatorEmail query parameter is required' });
     }
@@ -310,8 +334,8 @@ app.get(['/events/creator', '/user/created-events'], async (req, res) => {
   }
 });
 
-// PUT update an event (Only creator can update)
-app.put('/events/:id', async (req, res) => {
+// PUT update an event (Only creator can update - Protected by JWT)
+app.put('/events/:id', requireJwtAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const {
@@ -321,8 +345,8 @@ app.put('/events/:id', async (req, res) => {
       location,
       thumbnailImageUrl,
       eventDescription,
-      userEmail,
     } = req.body;
+    const userEmail = req.user?.email || req.body?.userEmail;
 
     if (!userEmail) {
       return res.status(401).json({ error: 'Authentication required. userEmail missing.' });
@@ -372,11 +396,11 @@ app.put('/events/:id', async (req, res) => {
   }
 });
 
-// DELETE an event (Only creator can delete)
-app.delete('/events/:id', async (req, res) => {
+// DELETE an event (Only creator can delete - Protected by JWT)
+app.delete('/events/:id', requireJwtAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    const { userEmail } = req.query;
+    const userEmail = req.user?.email || req.query?.userEmail;
 
     if (!userEmail) {
       return res.status(401).json({ error: 'Authentication required. userEmail missing.' });

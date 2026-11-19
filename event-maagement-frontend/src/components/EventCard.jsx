@@ -85,9 +85,9 @@ export default function EventCard({ event, isPast = false }) {
 
   // Upcoming event card styling (Coming Date First)
   return (
-    <div className="group bg-white rounded-2xl border border-[#E8E2D5] shadow-xs hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col hover:-translate-y-1">
+    <div className="group bg-white dark:bg-[#181818] rounded-2xl border border-[#E8E2D5] dark:border-white/10 shadow-xs hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col hover:-translate-y-1">
       {/* 1. Thumbnail */}
-      <div className="relative h-56 w-full overflow-hidden bg-gray-100">
+      <div className="relative h-56 w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
         <Image
           src={event.thumbnailImageUrl || fallbackImage}
           alt={event.eventTitle || "Event Thumbnail"}
@@ -112,31 +112,31 @@ export default function EventCard({ event, isPast = false }) {
 
       <div className="p-6 flex flex-col flex-1">
         {/* 4. Title */}
-        <h3 className="text-xl font-serif font-bold text-[#101010] mb-2.5 group-hover:text-[#0f766e] transition-colors line-clamp-1">
+        <h3 className="text-xl font-serif font-bold text-[#101010] dark:text-[#F5F1E8] mb-2.5 group-hover:text-[#0f766e] dark:group-hover:text-[#D9A441] transition-colors line-clamp-1">
           {event.eventTitle}
         </h3>
 
         {/* 5. Location */}
-        <div className="flex items-center gap-1.5 text-xs text-[#777777] mb-3">
+        <div className="flex items-center gap-1.5 text-xs text-[#777777] dark:text-gray-400 mb-3">
           <MapPin className="w-3.5 h-3.5 text-[#D9A441] shrink-0" />
           <span className="truncate">{event.location}</span>
         </div>
 
         {/* Event Description */}
-        <p className="text-sm text-gray-600 font-sans line-clamp-2 mb-6 flex-1 leading-relaxed">
+        <p className="text-sm text-gray-600 dark:text-gray-400 font-sans line-clamp-2 mb-6 flex-1 leading-relaxed">
           {event.eventDescription}
         </p>
 
         {/* 6. Card Footer with View Event Button */}
-        <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
-          <span className="text-[11px] uppercase tracking-wider text-[#0f766e] font-semibold flex items-center gap-1">
+        <div className="pt-4 border-t border-gray-100 dark:border-white/10 flex items-center justify-between">
+          <span className="text-[11px] uppercase tracking-wider text-[#0f766e] dark:text-emerald-400 font-semibold flex items-center gap-1">
             <Sparkles className="w-3 h-3" />
             Open for Volunteers
           </span>
 
           <Link
             href={`/events/${eventId}`}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#101010] hover:bg-[#0f766e] text-white text-xs font-semibold rounded-xl shadow-xs hover:shadow-md transition-all duration-300 group/btn cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#101010] dark:bg-[#D9A441] hover:bg-[#0f766e] dark:hover:bg-[#C59333] text-white dark:text-[#101010] text-xs font-semibold rounded-xl shadow-xs hover:shadow-md transition-all duration-300 group/btn cursor-pointer"
           >
             <span>View Event</span>
             <Eye className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />

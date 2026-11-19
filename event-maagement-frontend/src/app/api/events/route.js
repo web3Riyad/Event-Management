@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { MongoClient } from "mongodb";
+import { extractAndVerifyJwt } from "@/lib/jwt";
 
 const uri = process.env.MONGODB_URL;
 let client;
@@ -74,9 +75,10 @@ export async function GET(request) {
   }
 }
 
-// POST create a new event
+// POST create a new event (Protected by JWT)
 export async function POST(request) {
   try {
+    const authUser = extractAndVerifyJwt(request);
     const body = await request.json();
     const {
       eventTitle,
@@ -85,10 +87,17 @@ export async function POST(request) {
       location,
       thumbnailImageUrl,
       eventDescription,
-      creatorEmail,
       creatorName,
       creatorId,
     } = body;
+    const creatorEmail = authUser?.email || body?.creatorEmail;
+
+    if (!creatorEmail) {
+      return NextResponse.json(
+        { error: "Unauthorized: Valid JWT or authenticated user email is required." },
+        { status: 401 }
+      );
+    }
 
     if (!eventTitle || !eventType || !eventDate) {
       return NextResponse.json(
@@ -102,10 +111,14 @@ export async function POST(request) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 1500);
+      const authHeader = request.headers.get("authorization") || "";
       const backendRes = await fetch(`${backendUrl}/events`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        headers: {
+          "Content-Type": "application/json",
+          ...(authHeader ? { Authorization: authHeader } : {}),
+        },
+        body: JSON.stringify({ ...body, creatorEmail }),
         signal: controller.signal,
       });
       clearTimeout(timeoutId);
