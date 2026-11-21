@@ -13,6 +13,7 @@ A modern, full-stack event management platform purpose-built for grassroots volu
 ---
 
 ## Table of Contents
+
 - [Key Features](#key-features)
 - [Challenge Requirements Implemented](#challenge-requirements-implemented)
 - [Tech Stack](#tech-stack)
@@ -53,6 +54,7 @@ A modern, full-stack event management platform purpose-built for grassroots volu
 ## Challenge Requirements Implemented
 
 ### 1. Form Validation
+
 - **Create & Update Event Forms**:
   - **Event Title**: Required, minimum 5 characters.
   - **Event Category**: Required, valid initiative category selection.
@@ -67,6 +69,7 @@ A modern, full-stack event management platform purpose-built for grassroots volu
   - Password show/hide toggles and toast notifications.
 
 ### 2. Full System Theme Customization (Light / Dark)
+
 - Seamless theme toggling via `ThemeToggle.jsx` located in both desktop and mobile navigation.
 - Persistent state saved to `localStorage` and synchronized across all open tabs via custom `theme-changed` window events.
 - Zero-flash hydration utilizing early `<Script strategy="beforeInteractive">` injection in `RootLayout`.
@@ -75,6 +78,7 @@ A modern, full-stack event management platform purpose-built for grassroots volu
   - **Cards, Modals & Dropdowns**: Fully styled with `dark:bg-[#181818]`, `dark:border-white/10`, and dark-mode text variants.
 
 ### 3. JWT Authentication & API Protection
+
 - Dedicated `/jwt` endpoint generates cryptographically signed tokens containing user claims (`email`, `name`, `id`).
 - Custom `requireJwtAuth` middleware guards all write/modify operations:
   - `POST /events` (Create Event)
@@ -87,6 +91,7 @@ A modern, full-stack event management platform purpose-built for grassroots volu
 - Client-side token caching in `sessionStorage` with automated retrieval via `getAuthHeaders()`.
 
 ### 4. Custom Loading Skeletons
+
 - Responsive loading skeletons matching real component layouts:
   - `EventCardSkeleton.jsx`: Image banner, category pill, title, location, and button skeletons.
   - `EventDetailsSkeleton.jsx`: Hero photo, stats metrics bar, description block, guidelines card, and action button skeletons.
@@ -103,6 +108,7 @@ A modern, full-stack event management platform purpose-built for grassroots volu
 ## Tech Stack
 
 ### Frontend
+
 - **Framework**: [Next.js 16.4.6](https://nextjs.org/) (App Router)
 - **UI Library**: [React 19.3.0](https://react.dev/)
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/), DaisyUI v5, HeroUI
@@ -111,6 +117,7 @@ A modern, full-stack event management platform purpose-built for grassroots volu
 - **Dates**: `date-fns` & Native Intl Formatter
 
 ### Backend
+
 - **Runtime & Framework**: [Node.js](https://nodejs.org/) & [Express.js 5.3.0](https://expressjs.com/) (ES Modules)
 - **Database**: [MongoDB Atlas](https://www.mongodb.com/atlas) with native `mongodb` 7.9.0 driver
 - **Security & Tokens**: JWT (HMAC-SHA256 signature and verification)
@@ -123,6 +130,7 @@ A modern, full-stack event management platform purpose-built for grassroots volu
 ### MongoDB Database: `EventManagement`
 
 1. **`event` Collection**:
+
    ```json
    {
      "_id": "ObjectId",
@@ -140,6 +148,7 @@ A modern, full-stack event management platform purpose-built for grassroots volu
    ```
 
 2. **`joinedEvents` Collection**:
+
    ```json
    {
      "_id": "ObjectId",
@@ -167,36 +176,40 @@ A modern, full-stack event management platform purpose-built for grassroots volu
 ## API Endpoints Reference
 
 ### Public Routes
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/` | API Health Check |
-| `GET` | `/events` | Get all events (supports `?timeframe=upcoming\|past&eventType=...&limit=6`) |
-| `GET` | `/events/upcoming` | Get upcoming events sorted ascending by date (nearest first) |
-| `GET` | `/events/past` | Get past events sorted descending by date |
-| `GET` | `/events/:id` | Get single event details with live volunteer count |
+
+| Method | Endpoint           | Description                                                                 |
+| ------ | ------------------ | --------------------------------------------------------------------------- |
+| `GET`  | `/`                | API Health Check                                                            |
+| `GET`  | `/events`          | Get all events (supports `?timeframe=upcoming\|past&eventType=...&limit=6`) |
+| `GET`  | `/events/upcoming` | Get upcoming events sorted ascending by date (nearest first)                |
+| `GET`  | `/events/past`     | Get past events sorted descending by date                                   |
+| `GET`  | `/events/:id`      | Get single event details with live volunteer count                          |
 
 ### Authentication & JWT
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/jwt` | Generate a signed JWT token from user email/claims |
+
+| Method | Endpoint | Description                                        |
+| ------ | -------- | -------------------------------------------------- |
+| `POST` | `/jwt`   | Generate a signed JWT token from user email/claims |
 
 ### Protected Routes (Requires `Authorization: Bearer <JWT>`)
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/events` | Create a new community event (strict validation enforced) |
-| `PUT` | `/events/:id` | Update an existing event (creator only) |
-| `DELETE` | `/events/:id` | Delete an existing event (creator only) |
-| `POST` | `/events/:id/join` | Join an event as a volunteer (double-join prevention) |
-| `GET` | `/events/user/:email` | Get all events organized by a specific user |
-| `GET` | `/user/joined-events` | Get all events joined by the authenticated user |
-| `GET` | `/user/profile` | Get user profile info, created count, and joined count |
-| `PUT` | `/user/profile` | Update user display name and profile picture |
+
+| Method   | Endpoint              | Description                                               |
+| -------- | --------------------- | --------------------------------------------------------- |
+| `POST`   | `/events`             | Create a new community event (strict validation enforced) |
+| `PUT`    | `/events/:id`         | Update an existing event (creator only)                   |
+| `DELETE` | `/events/:id`         | Delete an existing event (creator only)                   |
+| `POST`   | `/events/:id/join`    | Join an event as a volunteer (double-join prevention)     |
+| `GET`    | `/events/user/:email` | Get all events organized by a specific user               |
+| `GET`    | `/user/joined-events` | Get all events joined by the authenticated user           |
+| `GET`    | `/user/profile`       | Get user profile info, created count, and joined count    |
+| `PUT`    | `/user/profile`       | Update user display name and profile picture              |
 
 ---
 
 ## Getting Started & Local Setup
 
 ### Prerequisites
+
 - [Node.js](https://nodejs.org/) (version 18.x or higher)
 - [npm](https://www.npmjs.com/) (version 9.x or higher)
 - A [MongoDB Atlas](https://www.mongodb.com/atlas) cluster connection string
@@ -224,7 +237,7 @@ A modern, full-stack event management platform purpose-built for grassroots volu
    ```bash
    npm run dev
    ```
-   *The backend will run on `http://localhost:5000`.*
+   _The backend will run on `http://localhost:5000`._
 
 ---
 
@@ -239,6 +252,7 @@ A modern, full-stack event management platform purpose-built for grassroots volu
    npm install
    ```
 3. Create a `.env` file in the `event-maagement-frontend` directory:
+
    ```env
    BETTER_AUTH_SECRET=your_better_auth_secret_key
    BETTER_AUTH_URL=http://localhost:3000
@@ -253,6 +267,7 @@ A modern, full-stack event management platform purpose-built for grassroots volu
    GITHUB_CLIENT_ID=your_github_client_id
    GITHUB_CLIENT_SECRET=your_github_client_secret
    ```
+
 4. Start the Next.js development server:
    ```bash
    npm run dev
@@ -291,6 +306,7 @@ The application provides a theme toggle button in the navbar allowing users to s
 ---
 
 ## Author & License
+
 - **Author**: Riyad Khandakar
-- **Project**: Assignment 9 — Social Service & Community Event Management
+- **Project**: Social Service & Community Event Management
 - **License**: ISC

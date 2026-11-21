@@ -1,10 +1,14 @@
+import { setServers } from "node:dns/promises";
+// Use public DNS servers
+setServers(["1.1.1.1", "8.8.8.8"]);
+
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { MongoClient, ObjectId } from 'mongodb';
 import { signJwt, verifyJwt, requireJwtAuth } from './jwt.js';
 
-const uri = `mongodb://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@ac-dyizrz2-shard-00-00.khhcdmh.mongodb.net:27017,ac-dyizrz2-shard-00-01.khhcdmh.mongodb.net:27017,ac-dyizrz2-shard-00-02.khhcdmh.mongodb.net:27017/?ssl=true&replicaSet=atlas-ej3urr-shard-0&authSource=admin`;
+const uri=`mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@cluster0.khhcdmh.mongodb.net/`;
 const client = new MongoClient(uri);
 const port = process.env.PORT || 5000;
 
@@ -515,8 +519,12 @@ app.put('/user/profile', requireJwtAuth, async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Event Management Backend running on http://localhost:${port}`);
-});
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(port, () => {
+    console.log(`Event Management Backend running on http://localhost:${port}`);
+  });
+}
+
+export default app;
 
 
